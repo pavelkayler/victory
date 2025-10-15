@@ -1,8 +1,6 @@
+import { Login } from "../../components/login/Login.jsx";
+
 const LoginPage = () => {
-  return (
-    <>
-      <Login />
-    </>
-  );
+  return <Login />;
 };
 export { LoginPage };
