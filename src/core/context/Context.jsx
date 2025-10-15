@@ -1,9 +1,15 @@
 import { createContext, useState } from "react";
 
-const Context = createContext({});
+const Context = createContext({
+  email: "",
+  setEmail: () => {},
+  password: "",
+  setPassword: () => {},
+});
+
 const ContextProvider = ({ children }) => {
-  const { email, setEmail } = useState([]);
-  const { password, setPassword } = useState([]);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const values = {
     email,
@@ -11,6 +17,7 @@ const ContextProvider = ({ children }) => {
     password,
     setPassword,
   };
+
   return <Context.Provider value={values}>{children}</Context.Provider>;
 };
 export { ContextProvider, Context };

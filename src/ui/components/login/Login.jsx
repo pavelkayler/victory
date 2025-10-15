@@ -1,13 +1,22 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { Context } from "../../../core/context/Context.jsx";
 import { Button, Card, Container, Form } from "react-bootstrap";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
-  const { email, setEmail } = useContext(Context);
-  const { password, setPassword } = useContext(Context);
-
+  const { email, setEmail, password, setPassword } = useContext(Context);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
   const handleSubmit = (event) => {
     event.preventDefault();
+
+    if (email === "admin@admin.ru" && password === "admin") {
+      setError("");
+      console.log("Login successfull");
+      navigate("/main");
+    } else {
+      setError("Неверный логин или пароль");
+    }
     console.log("Login attempt with:", { email, password });
   };
 
