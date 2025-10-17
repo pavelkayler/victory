@@ -1,7 +1,7 @@
-import { Core } from "../../components/core/Core.jsx";
+import { Ques } from "../../components/ques/Ques.jsx";
 
 const MainPage = () => {
-  return <Core />;
+  return <Ques />;
 };
 
 export { MainPage };

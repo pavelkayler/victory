@@ -1,7 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { Button, Container } from "react-bootstrap";
 
-const Core = () => {
+const Ques = () => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -16,7 +16,9 @@ const Core = () => {
         EXIT
       </Button>
     </Container>
+
+
   );
 };
 
-export { Core };
+export { Ques };
