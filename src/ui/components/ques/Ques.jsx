@@ -105,6 +105,85 @@ const Ques = () => {
     setUserAnswers([]);
   };
 
+  const [selectedQuestionId, setSelectedQuestionId] = useState(null);
+  const [selectedAnswerId, setSelectedAnswerId] = useState(null);
+  const [feedback, setFeedback] = useState(null);
+  const [score, setScore] = useState(0);
+  const [attempts, setAttempts] = useState(0);
+  const [answersOrder] = useState(() => shuffle(QUESTION_PAIRS));
+  const [isLocked, setIsLocked] = useState(false);
+  const [matchedIds, setMatchedIds] = useState(() => new Set());
+  const resetTimerRef = useRef(null);
+
+  useEffect(() => {
+    if (!selectedQuestionId || !selectedAnswerId || isLocked) {
+      return undefined;
+    }
+
+    const isCorrect = selectedQuestionId === selectedAnswerId;
+    const isAlreadyMatched = matchedIds.has(selectedQuestionId);
+    setFeedback({
+      questionId: selectedQuestionId,
+      answerId: selectedAnswerId,
+      isCorrect,
+    });
+    setIsLocked(true);
+    setAttempts((previous) => previous + 1);
+
+    if (isCorrect && !isAlreadyMatched) {
+      setScore((previous) => previous + 1);
+      setMatchedIds((previous) => {
+        const updated = new Set(previous);
+        updated.add(selectedQuestionId);
+        return updated;
+      });
+    }
+
+    resetTimerRef.current = setTimeout(() => {
+      setFeedback(null);
+      setSelectedQuestionId(null);
+      setSelectedAnswerId(null);
+      setIsLocked(false);
+    }, 1200);
+
+    return undefined;
+  }, [selectedQuestionId, selectedAnswerId, isLocked, matchedIds]);
+
+  useEffect(() => () => {
+    if (resetTimerRef.current) {
+      clearTimeout(resetTimerRef.current);
+    }
+  }, []);
+
+  const greetingName = email || "Участник";
+
+  const handleQuestionSelect = (id) => {
+    if (isLocked || matchedIds.has(id)) {
+      return;
+    }
+
+    setSelectedQuestionId((previous) => (previous === id ? null : id));
+  };
+
+  const handleAnswerSelect = (id) => {
+    if (isLocked || matchedIds.has(id)) {
+      return;
+    }
+
+    setSelectedAnswerId((previous) => (previous === id ? null : id));
+  };
+
+  const handleFinish = () => {
+    addResult({
+      user: email || "Гость",
+      score,
+      total: QUESTION_PAIRS.length,
+      subject: SUBJECT,
+      date: new Date().toISOString().slice(0, 10),
+    });
+    navigate("/results");
+  };
+
   const handleLogout = () => {
     navigate("/");
   };
