@@ -108,7 +108,6 @@ const Ques = () => {
   const [selectedQuestionId, setSelectedQuestionId] = useState(null);
   const [selectedAnswerId, setSelectedAnswerId] = useState(null);
   const [feedback, setFeedback] = useState(null);
-  const [score, setScore] = useState(0);
   const [attempts, setAttempts] = useState(0);
   const [answersOrder] = useState(() => shuffle(QUESTION_PAIRS));
   const [isLocked, setIsLocked] = useState(false);
@@ -204,7 +203,6 @@ const Ques = () => {
     return "outline-secondary";
   };
 
-  const greetingName = email || "участник";
   const correctOptionIndex = currentQuestion?.answerIndex ?? 0;
 
   return (
