@@ -60,11 +60,22 @@ const Login = () => {
                   <p className="login-helper">
                     Используйте демо-аккаунт или введите собственные данные, чтобы
                     попасть на страницу викторины.
+                  <h1 className="h3 fw-bold mt-3">
+                    Войдите, чтобы начать игру
+                  </h1>
+                  <p className="login-helper">
+                    Используйте демо-аккаунт или введите собственные данные,
+                    чтобы попасть на страницу викторины.
                   </p>
                 </div>
 
                 {error && (
                   <Alert variant="danger" className="mb-4" data-testid="login-error">
+                  <Alert
+                    variant="danger"
+                    className="mb-4"
+                    data-testid="login-error"
+                  >
                     {error}
                   </Alert>
                 )}
