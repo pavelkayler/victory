@@ -4,7 +4,9 @@ import App from "./ui/app/App.jsx";
 import { ContextProvider } from "./core/context/Context.jsx";
 
 createRoot(document.getElementById("root")).render(
-  <ContextProvider>
-    <App />
-  </ContextProvider>,
+  <StrictMode>
+    <ContextProvider>
+      <App />
+    </ContextProvider>
+  </StrictMode>,
 );
