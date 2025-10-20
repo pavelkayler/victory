@@ -1,0 +1,76 @@
+.quiz-page {
+    min-height: 100vh;
+    padding: 3rem 1rem;
+    background: radial-gradient(circle at top left, rgba(59, 130, 246, 0.3), transparent 55%),
+    radial-gradient(circle at bottom right, rgba(99, 102, 241, 0.25), transparent 45%),
+    linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #111827 100%);
+    color: #fff;
+}
+
+.quiz-title {
+    font-size: clamp(1.75rem, 3vw, 2.25rem);
+    font-weight: 700;
+}
+
+.quiz-card,
+.quiz-summary-card,
+.quiz-progress-card {
+    border-radius: 1.5rem;
+    background: rgba(255, 255, 255, 0.96);
+    color: #1f2933;
+}
+
+.quiz-progress-card {
+    background: rgba(255, 255, 255, 0.85);
+}
+
+.quiz-option-button {
+    border-radius: 1rem;
+    padding: 1rem 1.25rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.quiz-option-button:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 0.75rem 1.5rem rgba(17, 24, 39, 0.12);
+}
+
+.quiz-option-button:disabled {
+    pointer-events: none;
+}
+
+.quiz-question-badge {
+    letter-spacing: 0.08em;
+    font-size: 0.75rem;
+}
+
+.option-index {
+    font-weight: 700;
+    font-size: 1.1rem;
+}
+
+.quiz-progress-bar {
+    height: 0.75rem;
+    border-radius: 999px;
+    overflow: hidden;
+}
+
+.quiz-review-list .list-group-item {
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(15, 23, 42, 0.08);
+}
+
+.quiz-review-list .list-group-item:last-child {
+    border-bottom: 0;
+}
+
+@media (max-width: 992px) {
+    .quiz-page {
+        padding: 2.5rem 1rem 4rem;
+    }
+}
