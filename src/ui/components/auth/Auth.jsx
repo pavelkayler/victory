@@ -33,7 +33,13 @@ const Auth = () => {
               <Form onSubmit={handleLogin}>
                 <FormGroup controlId="userName" className="mb-3">
                   <FormLabel>Имя пользователя</FormLabel>
-                  <FormControl type="text" placeholder="Введите имя" value={name} onChange={(event) => setName(event.target.value)} />
+                  <FormControl
+                    type="text"
+                    placeholder="Введите имя"
+                    value={name}
+                    onChange={(event) => setName(event.target.value)}
+                    required
+                  />
                 </FormGroup>
 
                 <div className="d-flex justify-content-center">

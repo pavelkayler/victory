@@ -942,6 +942,21 @@ h5 {
     width: 100%;
 }
 
+@media (max-width: 666px) {
+    .app-shell .quiz-container {
+        padding-inline: 0.35rem;
+    }
+
+    .quiz-card {
+        padding: 0.75rem;
+    }
+
+    .prompt-card {
+        width: calc(100% - 0.5rem);
+        padding: 1rem;
+    }
+}
+
 @media (max-width: 576px) {
     .user-footer__content {
         flex-direction: column;
