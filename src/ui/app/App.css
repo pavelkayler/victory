@@ -419,6 +419,8 @@ h5 {
     color: #111827;
     background: #ffffff;
     box-shadow: 0 12px 20px rgba(15, 23, 42, 0.06);
+    word-break: keep-all;
+    overflow-wrap: normal;
 }
 
 .prompt-actions {
@@ -527,7 +529,8 @@ h5 {
     text-overflow: unset;
     white-space: normal;
     line-height: 1.2;
-    word-break: break-word;
+    word-break: keep-all;
+    overflow-wrap: normal;
     width: 100%;
     padding-inline: clamp(0.45rem, 1vw, 0.7rem);
     font-weight: 700;
