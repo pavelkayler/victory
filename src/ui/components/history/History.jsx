@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useMemo } from "react";
 import {
   Container,
   Row,
@@ -8,13 +8,19 @@ import {
   CardTitle,
 } from "react-bootstrap";
 
-import { HistoryContext } from "../../../core/context/Context.jsx";
+import { HistoryContext, UserContext } from "../../../core/context/Context.jsx";
 import { useAuthGuard } from "../../../core/hooks/useAuthGuard.js";
 
 const History = () => {
   const { quizHistory } = useContext(HistoryContext);
+  const { userName } = useContext(UserContext);
 
   useAuthGuard();
+
+  const userHistory = useMemo(
+    () => quizHistory.filter((attempt) => attempt.userName === userName),
+    [quizHistory, userName],
+  );
 
   const formatDate = (iso) => {
     const date = new Date(iso);
@@ -45,11 +51,11 @@ const History = () => {
                 Журнал прохождений викторины
               </CardTitle>
 
-              {quizHistory.length === 0 ? (
+              {userHistory.length === 0 ? (
                 <p className="mb-0">Пока нет ни одной попытки.</p>
               ) : (
                 <div className="history-grid">
-                  {quizHistory.map((attempt, index) => (
+                  {userHistory.map((attempt, index) => (
                     <div className="history-card" key={attempt.id ?? index}>
                       <div className="history-card__header">
                         <div className="history-topic-block">
@@ -61,19 +67,19 @@ const History = () => {
                       </div>
 
                       <div className="history-stats">
-                        <div className="history-stat history-stat--user">
-                          <span className="history-stat__label">Участник</span>
-                          <span className="history-stat__value">
-                            <i className="bi bi-person-circle text-primary" />
-                            {attempt.userName}
-                          </span>
-                        </div>
-
                         <div className="history-stat history-stat--time">
                           <span className="history-stat__label">Время</span>
                           <span className="history-stat__value">
                             <i className="bi bi-stopwatch text-warning" />
                             {formatDuration(attempt.durationSec)}
+                          </span>
+                        </div>
+
+                        <div className="history-stat history-stat--combo">
+                          <span className="history-stat__label">Комбо</span>
+                          <span className="history-stat__value">
+                            <i className="bi bi-fire" />
+                            {attempt.streak ?? "-"}
                           </span>
                         </div>
 
@@ -90,14 +96,6 @@ const History = () => {
                           <span className="history-stat__value">
                             <i className="bi bi-x-circle-fill" />
                             {attempt.wrong}
-                          </span>
-                        </div>
-
-                        <div className="history-stat history-stat--combo">
-                          <span className="history-stat__label">Комбо</span>
-                          <span className="history-stat__value">
-                            <i className="bi bi-fire" />
-                            {attempt.streak ?? "-"}
                           </span>
                         </div>
                       </div>
