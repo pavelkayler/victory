@@ -1102,7 +1102,7 @@ h5 {
     display: grid;
     gap: 0.65rem;
     margin-top: 0.75rem;
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     grid-auto-rows: 1fr;
 }
 
@@ -1114,26 +1114,6 @@ h5 {
     border: 1px solid #e5e7eb;
     display: grid;
     gap: 0.25rem;
-}
-
-.history-stat--user {
-    grid-column: 1 / span 3;
-}
-
-.history-stat--time {
-    grid-column: 4 / span 3;
-}
-
-.history-stat--success {
-    grid-column: 1 / span 2;
-}
-
-.history-stat--danger {
-    grid-column: 3 / span 2;
-}
-
-.history-stat--combo {
-    grid-column: 5 / span 2;
 }
 
 @media (max-width: 992px) {
@@ -1171,20 +1151,6 @@ h5 {
     .history-stats {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
-
-    .history-stat--user,
-    .history-stat--time,
-    .history-stat--combo {
-        grid-column: 1 / span 2;
-    }
-
-    .history-stat--success {
-        grid-column: 1 / span 1;
-    }
-
-    .history-stat--danger {
-        grid-column: 2 / span 1;
-    }
 }
 
 @media (max-width: 576px) {
@@ -1217,7 +1183,6 @@ h5 {
         grid-template-columns: 1fr;
     }
 
-    .history-stat--user,
     .history-stat--time,
     .history-stat--success,
     .history-stat--danger,
