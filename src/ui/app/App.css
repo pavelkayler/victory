@@ -1001,6 +1001,108 @@ h5 {
     }
 }
 
+/* ===== АДМИНКА ===== */
+
+.admin-card {
+    background: #fff;
+}
+
+.admin-auth-form {
+    max-width: 480px;
+}
+
+.admin-stat {
+    background: linear-gradient(135deg, #eef2ff, #e0f2fe);
+    border: 1px solid #c7d2fe;
+    border-radius: 14px;
+    padding: 1rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    height: 100%;
+    box-shadow: 0 12px 22px rgba(37, 99, 235, 0.12);
+}
+
+.admin-stat__label {
+    font-size: 0.95rem;
+    color: #475569;
+    font-weight: 600;
+}
+
+.admin-stat__value {
+    font-size: 1.8rem;
+    font-weight: 800;
+    color: #0f172a;
+}
+
+.admin-form-card {
+    border: 1px dashed #cbd5e1;
+}
+
+.admin-topics-list {
+    max-height: 520px;
+    overflow-y: auto;
+    padding-right: 0.25rem;
+}
+
+.admin-topic-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.85rem;
+    align-items: center;
+    padding: 0.9rem 1rem;
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    background: #fff;
+    box-shadow: 0 8px 20px rgba(15, 23, 42, 0.06);
+}
+
+.admin-topic-row__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.admin-topic-row__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+.admin-topic-row__add {
+    min-width: 150px;
+}
+
+.admin-questions-list .admin-question-card {
+    border: 1px solid #e5e7eb;
+    border-radius: 14px;
+    box-shadow: 0 10px 20px rgba(15, 23, 42, 0.08);
+}
+
+.admin-question-card.is-highlighted {
+    border-color: #93c5fd;
+    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.2);
+}
+
+.admin-question-card .form-label {
+    font-weight: 600;
+    color: #0f172a;
+}
+
+@media (max-width: 640px) {
+    .admin-topic-row {
+        grid-template-columns: 1fr;
+        align-items: start;
+    }
+
+    .admin-topic-row__actions {
+        width: 100%;
+        justify-content: flex-start;
+    }
+}
+
 /* ===== КНОПКИ ===== */
 
 /* делаем все кнопки удобными для пальца */

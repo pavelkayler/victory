@@ -68,11 +68,6 @@ const QuizColumns = ({ hasStarted }) => {
 
   return (
     <div className={`quiz-columns ${hasStarted ? "is-visible" : ""}`}>
-      <div className="column-title-row">
-        <div className="column-title text-end">Вопросы</div>
-        <div className="column-title text-start">Ответы</div>
-      </div>
-
       <div className="quiz-grid shadow-sm">
         {pairedRows.map((pair, index) => (
           <div className="quiz-grid-row" key={pair.left?.id ?? pair.right?.id ?? index}>

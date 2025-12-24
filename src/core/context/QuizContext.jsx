@@ -7,9 +7,9 @@ import {
   useState,
 } from "react";
 
-import { topics } from "../data/questions.js";
 import { UserContext } from "./UserContext.jsx";
 import { HistoryContext } from "./HistoryContext.jsx";
+import { TopicsContext } from "./TopicsContext.jsx";
 
 const QuizContext = createContext(null);
 
@@ -26,13 +26,15 @@ const shuffleArray = (source) => {
 
 // левый столбик — вопросы, правый — ответы
 const createColumns = (pairs) => {
-  const left = pairs.map((pair) => ({
+  const safePairs = Array.isArray(pairs) ? pairs : [];
+
+  const left = safePairs.map((pair) => ({
     id: `left-${pair.id}`,
     pairId: pair.id,
     text: pair.left,
   }));
 
-  const right = pairs.map((pair) => ({
+  const right = safePairs.map((pair) => ({
     id: `right-${pair.id}`,
     pairId: pair.id,
     text: pair.right,
@@ -84,20 +86,21 @@ const pickRandomPrompt = (columns, prevPairId = null) => {
 
 const QUIZ_DURATION_SECONDS = 5 * 60; // 5 минут
 
-const defaultTopic = topics[0];
-
 const QuizProvider = ({ children }) => {
   const { userName } = useContext(UserContext);
   const { addQuizAttempt } = useContext(HistoryContext);
+  const { topics } = useContext(TopicsContext);
 
-  const [questions, setQuestions] = useState(defaultTopic.questions);
-  const [topic, setTopic] = useState(defaultTopic);
+  const initialTopic = topics[0] ?? null;
+
+  const [questions, setQuestions] = useState(initialTopic?.questions ?? []);
+  const [topic, setTopic] = useState(initialTopic);
 
   const [sessionId, setSessionId] = useState(0);
   const [completedSessionId, setCompletedSessionId] = useState(null);
 
   const [columns, setColumns] = useState(() =>
-    createColumns(defaultTopic.questions),
+    createColumns(initialTopic?.questions ?? []),
   );
   const { leftItems, rightItems } = columns;
 
@@ -122,7 +125,11 @@ const QuizProvider = ({ children }) => {
 
   // подготовка квиза (после выбора темы)
   const initQuiz = useCallback((nextTopic = null) => {
-    const selectedTopic = nextTopic || topic || defaultTopic;
+    const selectedTopic = nextTopic || topic || topics[0];
+
+    if (!selectedTopic) {
+      return;
+    }
 
     setTopic(selectedTopic);
     setQuestions(selectedTopic.questions);
@@ -148,11 +155,17 @@ const QuizProvider = ({ children }) => {
     setSessionId((prev) => prev + 1);
     setCompletedSessionId(null);
     setCountdown(null);
-  }, [topic]);
+  }, [topic, topics]);
 
   const resetTopic = useCallback(() => {
     setTopic(null);
   }, []);
+
+  useEffect(() => {
+    if (!topic && topics.length > 0) {
+      initQuiz(topics[0]);
+    }
+  }, [initQuiz, topic, topics]);
 
   // старт: первый рандом + включаем таймер
   const startQuiz = useCallback(() => {
@@ -311,7 +324,7 @@ const QuizProvider = ({ children }) => {
       wrong: errorsCount,
       durationSec,
       streak: bestStreak,
-      topicTitle: topic.title,
+      topicTitle: topic?.title ?? "",
     });
   }, [
     isQuizFinished,
