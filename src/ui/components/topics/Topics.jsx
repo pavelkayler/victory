@@ -9,14 +9,15 @@ import {
   CardTitle,
   CardText,
   Button,
+  Alert,
 } from "react-bootstrap";
 
-import { QuizContext } from "../../../core/context/Context.jsx";
+import { QuizContext, TopicsContext } from "../../../core/context/Context.jsx";
 import { useAuthGuard } from "../../../core/hooks/useAuthGuard.js";
-import { topics } from "../../../core/data/questions.js";
 
 const Topics = () => {
   const { initQuiz } = useContext(QuizContext);
+  const { topics } = useContext(TopicsContext);
   const navigate = useNavigate();
 
   useAuthGuard();
@@ -37,26 +38,32 @@ const Topics = () => {
                 Выбор темы
               </CardTitle>
 
-              {topics.map((topic) => (
-                <Card key={topic.id} className="mb-3 border-primary">
-                  <CardBody>
-                    <CardTitle className="fs-5 mb-2">
-                      <i className="bi bi-book-half me-2 text-primary" />
-                      {topic.title}
-                    </CardTitle>
-                    <CardText className="mb-3 text-muted">
-                      {topic.description}
-                    </CardText>
-                    <Button
-                      variant="primary"
-                      type="button"
-                      onClick={handleSelect(topic)}
-                    >
-                      Выбрать тему
-                    </Button>
-                  </CardBody>
-                </Card>
-              ))}
+              {topics.length === 0 ? (
+                <Alert variant="info" className="mb-0">
+                  Пока нет тем. Добавьте их в админ-кабинете.
+                </Alert>
+              ) : (
+                topics.map((topic) => (
+                  <Card key={topic.id} className="mb-3 border-primary">
+                    <CardBody>
+                      <CardTitle className="fs-5 mb-2 d-flex align-items-start gap-2">
+                        <i className="bi bi-book-half text-primary" aria-hidden="true" />
+                        <span>{topic.title}</span>
+                      </CardTitle>
+                      <CardText className="mb-3 text-muted">
+                        {topic.description}
+                      </CardText>
+                      <Button
+                        variant="primary"
+                        type="button"
+                        onClick={handleSelect(topic)}
+                      >
+                        Выбрать тему
+                      </Button>
+                    </CardBody>
+                  </Card>
+                ))
+              )}
             </CardBody>
           </Card>
         </Col>
