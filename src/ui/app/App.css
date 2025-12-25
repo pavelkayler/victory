@@ -164,6 +164,27 @@ body {
     flex-wrap: wrap;
 }
 
+.user-header-bar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.user-name {
+    max-width: 220px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.header-logout-btn {
+    white-space: nowrap;
+}
+
+.user-header-bar .btn {
+    min-width: 0;
+}
+
 .user-footer {
     border-top: 1px solid #e5e7eb;
     background: linear-gradient(120deg, #f8fafc, #eef2ff);
@@ -208,6 +229,12 @@ body {
 
 .header-finish-btn {
     min-width: 0;
+}
+
+@media (max-width: 576px) {
+    .user-name {
+        max-width: 160px;
+    }
 }
 
 @media (max-width: 360px) {
@@ -839,12 +866,12 @@ h5 {
     display: inline-flex;
     align-items: center;
     gap: 0.45rem;
-    padding: 0.45rem 1rem;
+    padding: 0.45rem 0.9rem;
     border-radius: 14px;
     background: linear-gradient(120deg, #fff7ed, #fefce8);
     border: 1px solid #fbbf24;
     font-variant-numeric: tabular-nums;
-    min-width: 0;
+    min-width: 104px;
     justify-content: center;
     color: #92400e;
     font-weight: 800;
@@ -855,35 +882,35 @@ h5 {
     position: relative;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     flex-wrap: nowrap;
     min-height: 64px;
     width: 100%;
     padding-inline: clamp(0.35rem, 1vw, 0.75rem);
-    gap: 0.5rem;
+    gap: 0.75rem;
 }
 
 .quiz-top-bar .quiz-timer {
     position: relative;
-    left: 0;
-    transform: none;
     z-index: 2;
     flex: 0 0 auto;
 }
 
 .quiz-scoreboard {
-    flex: 1 1 auto;
-    min-width: 0;
-    display: flex;
-    justify-content: center;
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: inline-flex;
     align-items: center;
-    gap: 0.75rem;
+    gap: 0.5rem;
+    min-width: 0;
 }
 
 .quiz-score {
     display: inline-flex;
     align-items: center;
-    gap: 0.35rem;
-    padding: 0.3rem 0.6rem;
+    justify-content: center;
+    padding: 0.32rem 0.7rem;
     border-radius: 999px;
     font-weight: 800;
     font-size: 0.95rem;
@@ -905,32 +932,54 @@ h5 {
 }
 
 .quiz-score__value {
-    min-width: 1.75rem;
+    min-width: 1.6rem;
     text-align: center;
 }
 
 .header-finish-btn {
-    min-width: 0;
+    min-width: 118px;
     flex: 0 0 auto;
     white-space: nowrap;
 }
 
-@media (max-width: 380px) {
+@media (max-width: 420px) {
     .quiz-top-bar {
+        gap: 0.5rem;
+    }
+
+    .quiz-timer,
+    .header-finish-btn {
+        padding-inline: 0.7rem;
+        padding-block: 0.35rem;
+        font-size: 0.92rem;
+    }
+
+    .quiz-score {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.88rem;
+    }
+
+    .quiz-score__value {
+        min-width: 1.4rem;
+    }
+}
+
+@media (max-width: 360px) {
+    .quiz-top-bar {
+        padding-inline: 0.25rem;
         gap: 0.35rem;
     }
 
     .quiz-timer,
     .header-finish-btn {
-        padding-inline: 0.75rem;
-        padding-block: 0.35rem;
-        font-size: 0.95rem;
+        padding-inline: 0.6rem;
+        padding-block: 0.3rem;
+        font-size: 0.88rem;
     }
 
     .quiz-score {
-        padding: 0.25rem 0.5rem;
-        font-size: 0.9rem;
-        gap: 0.25rem;
+        padding: 0.2rem 0.45rem;
+        font-size: 0.85rem;
     }
 }
 
@@ -943,7 +992,7 @@ h5 {
 
 .quiz-columns {
     margin-top: 0.75rem;
-    padding: clamp(0.15rem, 0.8vw, 0.4rem);
+    padding: 0.35rem;
     opacity: 0;
     transform: translateY(10px);
     transition: opacity 0.35s ease, transform 0.35s ease;
@@ -970,7 +1019,7 @@ h5 {
     display: flex;
     flex-direction: column;
     gap: clamp(0.35rem, 1vw, 0.6rem);
-    padding: clamp(0.3rem, 1vw, 0.65rem);
+    padding: 0.55rem;
     border: 1px solid rgba(37, 99, 235, 0.08);
     box-shadow: 0 10px 26px rgba(79, 70, 229, 0.1);
 }
@@ -1049,6 +1098,27 @@ h5 {
     width: 100%;
 }
 
+.quiz-card.page-card > .card-body {
+    padding: 0.75rem;
+}
+
+.quiz-columns {
+    padding: 0.35rem;
+}
+
+.quiz-grid {
+    padding: 0.55rem;
+}
+
+.list-group-item.quiz-item {
+    min-height: 44px;
+    padding-block: 0.4rem;
+    padding-inline: 0.6rem;
+    word-break: normal;
+    overflow-wrap: break-word;
+    white-space: normal;
+}
+
 @media (max-width: 666px) {
     .app-shell .quiz-container {
         padding-inline: 0.35rem;
@@ -1089,7 +1159,7 @@ h5 {
 
     .quiz-grid {
         gap: 0.35rem;
-        padding: 0.35rem;
+        padding: 0.5rem;
     }
 
     .quiz-grid-row {
@@ -1097,14 +1167,39 @@ h5 {
     }
 
     .list-group-item.quiz-item {
-        min-height: 42px;
-        font-size: 0.82rem;
-        padding-inline: clamp(0.85rem, 4vw, 1.15rem);
+        min-height: 44px;
+        font-size: 0.9rem;
+        padding-inline: 0.55rem;
+        padding-block: 0.38rem;
     }
 
     .column-title {
         font-size: 0.9rem;
         padding: 0.25rem 0.6rem;
+    }
+}
+
+@media (max-width: 420px) {
+    .quiz-card.page-card > .card-body {
+        padding: 0.6rem;
+    }
+
+    .quiz-columns {
+        padding: 0.25rem;
+    }
+
+    .quiz-grid {
+        padding: 0.45rem;
+    }
+
+    .quiz-grid-row {
+        gap: 0.35rem;
+    }
+
+    .list-group-item.quiz-item {
+        padding-inline: 0.5rem;
+        padding-block: 0.35rem;
+        font-size: 0.88rem;
     }
 }
 
@@ -1165,6 +1260,22 @@ h5 {
     margin: 1rem 0 1.25rem;
 }
 
+.admin-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.admin-title {
+    margin-bottom: 0;
+}
+
+.admin-exit-btn {
+    min-width: 140px;
+}
+
 .admin-topics-list {
     padding-right: 0.25rem;
 }
@@ -1218,6 +1329,23 @@ h5 {
 .admin-question-card .form-label {
     font-weight: 600;
     color: #0f172a;
+}
+
+.admin-question-text {
+    padding: 0.45rem 0.55rem;
+    background: #f8fafc;
+    border: 1px solid #e5e7eb;
+    border-radius: 10px;
+    min-height: 44px;
+    word-break: normal;
+    overflow-wrap: break-word;
+    white-space: normal;
+    font-size: 0.95rem;
+}
+
+.admin-topic-subtitle {
+    word-break: normal;
+    overflow-wrap: break-word;
 }
 
 @media (max-width: 640px) {
@@ -1308,6 +1436,11 @@ h5 {
 }
 
 /* ===== ИСТОРИЯ ===== */
+
+.history-filter-wrap {
+    max-width: 620px;
+    width: 100%;
+}
 
 .history-grid {
     display: grid;

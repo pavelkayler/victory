@@ -1,7 +1,6 @@
 import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Alert,
   Badge,
   Button,
   Card,
@@ -10,14 +9,19 @@ import {
   CardTitle,
   Container,
   Form,
+  FormControl,
+  FormGroup,
+  FormLabel,
   Stack,
+  Toast,
+  ToastContainer,
 } from "react-bootstrap";
 
 import { AdminContext, TopicsContext } from "../../../core/context/Context.jsx";
 
 const AdminPage = () => {
   const { isAdminAuthed, authorize, logoutAdmin } = useContext(AdminContext);
-  const { topics, addTopic, addQuestion, updateTopic } = useContext(TopicsContext);
+  const { topics, addTopic } = useContext(TopicsContext);
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
@@ -26,11 +30,10 @@ const AdminPage = () => {
   const [topicTitle, setTopicTitle] = useState("");
   const [topicDescription, setTopicDescription] = useState("");
   const [topicError, setTopicError] = useState("");
-  const [editError, setEditError] = useState("");
-  const [editingTopicId, setEditingTopicId] = useState(null);
-  const [editingTopicForm, setEditingTopicForm] = useState({
-    title: "",
-    description: "",
+  const [toastState, setToastState] = useState({
+    show: false,
+    message: "",
+    bg: "success",
   });
 
   const stats = useMemo(() => {
@@ -64,61 +67,22 @@ const AdminPage = () => {
     setTopicError("");
     const nextDescription = topicDescription.trim();
     addTopic(nextTitle, nextDescription);
+    showToast("Тема добавлена");
     setTopicTitle("");
     setTopicDescription("");
-  };
-
-  const handleStartEditTopic = (topic) => () => {
-    setEditingTopicId(topic.id);
-    setEditingTopicForm({
-      title: topic.title ?? "",
-      description: topic.description ?? "",
-    });
-    setEditError("");
-  };
-
-  const handleTopicEditChange = (field) => (event) => {
-    setEditingTopicForm((prev) => ({
-      ...prev,
-      [field]: event.target.value,
-    }));
-  };
-
-  const handleSaveTopic = (topicId) => () => {
-    const trimmedTitle = editingTopicForm.title.trim();
-    if (!trimmedTitle) {
-      setEditError("Название обязательно.");
-      return;
-    }
-
-    updateTopic(topicId, {
-      title: trimmedTitle,
-      description: editingTopicForm.description,
-    });
-    setEditingTopicId(null);
-    setEditingTopicForm({ title: "", description: "" });
-    setEditError("");
-  };
-
-  const handleCancelEdit = () => {
-    setEditingTopicId(null);
-    setEditingTopicForm({ title: "", description: "" });
-    setEditError("");
   };
 
   const handleEditClick = (topicId) => () => {
     navigate(`/qques/topics/${topicId}`);
   };
 
-  const handleQuickAddQuestion = (topicId) => () => {
-    const newQuestion = addQuestion(
-      topicId,
-      { left: "", right: "" },
-      { allowDraft: true },
-    );
-    navigate(`/qques/topics/${topicId}`, {
-      state: newQuestion ? { highlightQuestionId: newQuestion.id } : undefined,
-    });
+  const handleLogoutAdmin = () => {
+    logoutAdmin();
+    navigate("/", { replace: true });
+  };
+
+  const showToast = (message, bg = "success") => {
+    setToastState({ show: true, message, bg });
   };
 
   if (!isAdminAuthed) {
@@ -135,21 +99,19 @@ const AdminPage = () => {
             </CardSubtitle>
 
             <Form onSubmit={handlePasswordSubmit} className="admin-auth-form">
-              <Form.Group controlId="adminPassword" className="mb-3">
-                <Form.Label>Пароль</Form.Label>
-                <Form.Control
+              <FormGroup controlId="adminPassword" className="mb-3">
+                <FormLabel>Пароль</FormLabel>
+                <FormControl
                   type="password"
                   value={password}
                   placeholder="Введите пароль"
                   onChange={(event) => setPassword(event.target.value)}
                   required
                 />
-              </Form.Group>
+              </FormGroup>
 
               {passwordError && (
-                <Alert variant="danger" className="mb-3">
-                  {passwordError}
-                </Alert>
+                <div className="text-danger mb-3">{passwordError}</div>
               )}
 
               <Button variant="primary" type="submit" className="w-100">
@@ -168,148 +130,74 @@ const AdminPage = () => {
         <div className="page-wrap">
           <Card className="shadow-lg page-card admin-card">
             <CardBody>
-              <div className="d-flex align-items-start gap-3 flex-wrap">
-                <CardTitle className="fs-3 d-flex align-items-center gap-2 mb-0">
+              <div className="admin-title-row">
+                <CardTitle className="fs-3 d-flex align-items-center gap-2 mb-0 admin-title">
                   <i className="bi bi-shield-lock-fill text-primary" aria-hidden="true" />
-                  Админ-кабинет
+                  Админ-панель
                 </CardTitle>
-
-                <CardSubtitle className="text-muted mb-0">
-                  Доступ по адресу /qques. Сессия хранится до перехода на пользовательские страницы.
-                </CardSubtitle>
-              </div>
-
-              <div className="admin-logout-row">
-                <Button variant="outline-secondary" onClick={logoutAdmin}>
+                <Button
+                  variant="outline-secondary"
+                  onClick={handleLogoutAdmin}
+                  className="admin-exit-btn d-none d-md-inline-flex"
+                >
                   Выйти
                 </Button>
               </div>
 
-              <div className="d-flex align-items-center gap-2 mb-3">
-                <CardTitle as="h3" className="fs-5 mb-0">
-                  Список тем (всего: {stats.totalTopics})
-                </CardTitle>
+              <div className="d-flex justify-content-center d-md-none mt-2">
+                <Button variant="outline-secondary" onClick={handleLogoutAdmin} className="admin-exit-btn">
+                  Выйти
+                </Button>
               </div>
+
+              <CardSubtitle className="text-muted mb-3">
+                Доступ по адресу /qques. Сессия хранится до перехода на пользовательские страницы.
+              </CardSubtitle>
+
+              <CardTitle as="h3" className="fs-5 mb-3">
+                Список тем (всего: {stats.totalTopics})
+              </CardTitle>
 
               {topics.length === 0 ? (
                 <Card className="border-0 bg-light-subtle admin-form-card mb-4">
                   <CardBody>
-                    <Alert variant="info" className="mb-0">
+                    <div className="text-muted">
                       Тем пока нет. Создайте первую тему через форму ниже.
-                    </Alert>
+                    </div>
                   </CardBody>
                 </Card>
               ) : (
                 <Card className="border-0 mb-4">
                   <CardBody>
                     <Stack gap={3} className="admin-topics-list">
-                      {topics.map((topic) => {
-                        const isEditing = editingTopicId === topic.id;
-                        const currentTitle = isEditing
-                          ? editingTopicForm.title
-                          : topic.title;
-                        const currentDescription = isEditing
-                          ? editingTopicForm.description
-                          : topic.description;
-
-                        return (
-                          <div key={topic.id} className="admin-topic-row">
-                            <div className="admin-topic-row__meta">
-                              {isEditing ? (
-                                <Stack gap={2}>
-                                  <Form.Group controlId={`edit-topic-title-${topic.id}`}>
-                                    <Form.Label className="visually-hidden">Название</Form.Label>
-                                    <Form.Control
-                                      type="text"
-                                      value={currentTitle}
-                                      placeholder="Название темы"
-                                      onChange={handleTopicEditChange("title")}
-                                      isInvalid={Boolean(editError && !currentTitle.trim())}
-                                    />
-                                    <Form.Control.Feedback type="invalid">
-                                      Название обязательно.
-                                    </Form.Control.Feedback>
-                                  </Form.Group>
-                                  <Form.Group controlId={`edit-topic-description-${topic.id}`}>
-                                    <Form.Label className="visually-hidden">Описание</Form.Label>
-                                    <Form.Control
-                                      as="textarea"
-                                      rows={2}
-                                      value={currentDescription}
-                                      placeholder="Описание темы"
-                                      onChange={handleTopicEditChange("description")}
-                                    />
-                                  </Form.Group>
-                                  {editError && (
-                                    <div className="text-danger small">{editError}</div>
-                                  )}
-                                </Stack>
-                              ) : (
-                                <>
-                                  <div className="fw-semibold text-break">{currentTitle}</div>
-                                  <div className="text-muted small mb-2 text-break">
-                                    {currentDescription}
-                                  </div>
-                                </>
-                              )}
-                              <div className="d-flex align-items-center gap-2 flex-wrap">
-                                <Badge bg="light" text="dark">
-                                  <i className="bi bi-list-check me-1" aria-hidden="true" />
-                                  {topic.questions.length} вопросов
-                                </Badge>
-                              </div>
+                      {topics.map((topic) => (
+                        <div key={topic.id} className="admin-topic-row">
+                          <div className="admin-topic-row__meta">
+                            <div className="fw-semibold text-break">{topic.title}</div>
+                            <div className="text-muted small mb-2 text-break">
+                              {topic.description}
                             </div>
-
-                            <div className="admin-topic-row__actions">
-                              {isEditing ? (
-                                <div className="d-flex flex-wrap gap-2 w-100">
-                                  <Button
-                                    variant="success"
-                                    type="button"
-                                    onClick={handleSaveTopic(topic.id)}
-                                    disabled={!currentTitle.trim()}
-                                  >
-                                    Сохранить
-                                  </Button>
-                                  <Button
-                                    variant="outline-secondary"
-                                    type="button"
-                                    onClick={handleCancelEdit}
-                                  >
-                                    Отмена
-                                  </Button>
-                                </div>
-                              ) : (
-                                <div className="d-flex flex-wrap gap-2 w-100">
-                                  <Button
-                                    variant="outline-primary"
-                                    type="button"
-                                    onClick={handleStartEditTopic(topic)}
-                                  >
-                                    Редактировать
-                                  </Button>
-                                  <Button
-                                    variant="primary"
-                                    type="button"
-                                    className="admin-topic-row__add"
-                                    onClick={handleQuickAddQuestion(topic.id)}
-                                  >
-                                    <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-                                    Вопрос
-                                  </Button>
-                                  <Button
-                                    variant="outline-secondary"
-                                    type="button"
-                                    onClick={handleEditClick(topic.id)}
-                                  >
-                                    Открыть
-                                  </Button>
-                                </div>
-                              )}
+                            <div className="d-flex align-items-center gap-2 flex-wrap">
+                              <Badge bg="light" text="dark">
+                                <i className="bi bi-list-check me-1" aria-hidden="true" />
+                                {topic.questions.length} вопросов
+                              </Badge>
                             </div>
                           </div>
-                        );
-                      })}
+
+                          <div className="admin-topic-row__actions">
+                            <div className="d-flex flex-wrap gap-2 w-100">
+                              <Button
+                                variant="outline-primary"
+                                type="button"
+                                onClick={handleEditClick(topic.id)}
+                              >
+                                Редактировать
+                              </Button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
                     </Stack>
                   </CardBody>
                 </Card>
@@ -319,32 +207,30 @@ const AdminPage = () => {
                 <CardBody>
                   <CardTitle className="fs-5 mb-3">Добавить новую тему</CardTitle>
                   <Form onSubmit={handleCreateTopic}>
-                    <Form.Group controlId="topicTitle" className="mb-3">
-                      <Form.Label>Название</Form.Label>
-                      <Form.Control
+                    <FormGroup controlId="topicTitle" className="mb-3">
+                      <FormLabel>Название</FormLabel>
+                      <FormControl
                         type="text"
                         value={topicTitle}
                         onChange={(event) => setTopicTitle(event.target.value)}
                         placeholder='Например, "JavaScript"'
                         required
                       />
-                    </Form.Group>
+                    </FormGroup>
 
-                    <Form.Group controlId="topicDescription" className="mb-3">
-                      <Form.Label>Описание</Form.Label>
-                      <Form.Control
+                    <FormGroup controlId="topicDescription" className="mb-3">
+                      <FormLabel>Описание</FormLabel>
+                      <FormControl
                         as="textarea"
                         rows={3}
                         value={topicDescription}
                         onChange={(event) => setTopicDescription(event.target.value)}
                         placeholder="Кратко о теме"
                       />
-                    </Form.Group>
+                    </FormGroup>
 
                     {topicError && (
-                      <Alert variant="warning" className="mb-3">
-                        {topicError}
-                      </Alert>
+                      <div className="text-warning mb-3">{topicError}</div>
                     )}
 
                     <Button variant="success" type="submit" className="w-100">
@@ -357,6 +243,18 @@ const AdminPage = () => {
           </Card>
         </div>
       </Container>
+
+      <ToastContainer position="top-center" className="mt-3">
+        <Toast
+          bg={toastState.bg}
+          onClose={() => setToastState((prev) => ({ ...prev, show: false }))}
+          show={toastState.show}
+          delay={2400}
+          autohide
+        >
+          <Toast.Body className="text-white">{toastState.message}</Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 };

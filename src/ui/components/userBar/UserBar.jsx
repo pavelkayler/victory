@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { Button, Container } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 
 import { UserContext } from "../../../core/context/Context.jsx";
 
@@ -13,25 +13,22 @@ const UserBar = () => {
   const displayName = userName?.trim() || "Пользователь";
 
   return (
-    <footer className="user-footer mt-auto" aria-label="Панель пользователя">
-      <Container fluid className="user-footer__container">
-        <div className="user-footer__content">
-          <div className="user-footer__identity" aria-live="polite">
-            <i className="bi bi-person-circle text-primary" aria-hidden="true" />
-            <span className="fw-semibold">{displayName}</span>
-          </div>
-
-          <Button
-            variant="outline-danger"
-            type="button"
-            className="user-footer__logout"
-            onClick={logout}
-          >
-            Выйти
-          </Button>
-        </div>
-      </Container>
-    </footer>
+    <div className="user-header-bar" aria-label="Панель пользователя">
+      <div className="d-inline-flex align-items-center gap-2 flex-nowrap">
+        <i className="bi bi-person-circle text-primary" aria-hidden="true" />
+        <span className="fw-semibold user-name" title={displayName}>
+          {displayName}
+        </span>
+      </div>
+      <Button
+        variant="outline-danger"
+        type="button"
+        className="header-logout-btn"
+        onClick={logout}
+      >
+        Выйти
+      </Button>
+    </div>
   );
 };
 
