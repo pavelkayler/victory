@@ -8,10 +8,8 @@ import {
   CardBody,
   CardSubtitle,
   CardTitle,
-  Col,
   Container,
   Form,
-  Row,
   Stack,
 } from "react-bootstrap";
 
@@ -36,14 +34,8 @@ const AdminPage = () => {
   });
 
   const stats = useMemo(() => {
-    const totalQuestions = topics.reduce(
-      (sum, topic) => sum + topic.questions.length,
-      0,
-    );
-
     return {
       totalTopics: topics.length,
-      totalQuestions,
     };
   }, [topics]);
 
@@ -139,7 +131,7 @@ const AdminPage = () => {
               <CardTitle className="fs-3 mb-0">Админ-кабинет</CardTitle>
             </div>
             <CardSubtitle className="text-muted mb-4">
-              Доступ по адресу /qques. Сессия хранится до закрытия вкладки.
+              Доступ по адресу /qques. Сессия хранится до перехода на пользовательские страницы.
             </CardSubtitle>
 
             <Form onSubmit={handlePasswordSubmit} className="admin-auth-form">
@@ -176,204 +168,191 @@ const AdminPage = () => {
         <div className="page-wrap">
           <Card className="shadow-lg page-card admin-card">
             <CardBody>
-              <div className="d-flex align-items-start justify-content-between gap-3 flex-wrap">
-                <div>
-                  <CardTitle className="fs-3 d-flex align-items-center gap-2">
-                    <i className="bi bi-shield-lock-fill text-primary" aria-hidden="true" />
-                    Админ-кабинет
-                  </CardTitle>
+              <div className="d-flex align-items-start gap-3 flex-wrap">
+                <CardTitle className="fs-3 d-flex align-items-center gap-2 mb-0">
+                  <i className="bi bi-shield-lock-fill text-primary" aria-hidden="true" />
+                  Админ-кабинет
+                </CardTitle>
 
-                  <CardSubtitle className="text-muted mb-2">
-                    Доступ по адресу /qques. Сессия хранится до закрытия вкладки.
-                  </CardSubtitle>
-                </div>
+                <CardSubtitle className="text-muted mb-0">
+                  Доступ по адресу /qques. Сессия хранится до перехода на пользовательские страницы.
+                </CardSubtitle>
+              </div>
+
+              <div className="admin-logout-row">
                 <Button variant="outline-secondary" onClick={logoutAdmin}>
                   Выйти
                 </Button>
               </div>
 
-              <Row className="g-3 mb-4">
-                <Col md={6}>
-                  <div className="admin-stat">
-                    <span className="admin-stat__label">Темы</span>
-                    <span className="admin-stat__value">{stats.totalTopics}</span>
-                  </div>
-                </Col>
-                <Col md={6}>
-                  <div className="admin-stat">
-                    <span className="admin-stat__label">Всего вопросов</span>
-                    <span className="admin-stat__value">{stats.totalQuestions}</span>
-                  </div>
-                </Col>
-              </Row>
+              <div className="d-flex align-items-center gap-2 mb-3">
+                <CardTitle as="h3" className="fs-5 mb-0">
+                  Список тем (всего: {stats.totalTopics})
+                </CardTitle>
+              </div>
 
-              <Row className="g-4">
-                <Col md={6}>
-                  <Card className="h-100 border-0 bg-light-subtle admin-form-card">
-                    <CardBody>
-                      <CardTitle className="fs-5 mb-3">Добавить новую тему</CardTitle>
-                      <Form onSubmit={handleCreateTopic}>
-                        <Form.Group controlId="topicTitle" className="mb-3">
-                          <Form.Label>Название</Form.Label>
-                          <Form.Control
-                            type="text"
-                            value={topicTitle}
-                            onChange={(event) => setTopicTitle(event.target.value)}
-                            placeholder='Например, "JavaScript"'
-                            required
-                          />
-                        </Form.Group>
+              {topics.length === 0 ? (
+                <Card className="border-0 bg-light-subtle admin-form-card mb-4">
+                  <CardBody>
+                    <Alert variant="info" className="mb-0">
+                      Тем пока нет. Создайте первую тему через форму ниже.
+                    </Alert>
+                  </CardBody>
+                </Card>
+              ) : (
+                <Card className="border-0 mb-4">
+                  <CardBody>
+                    <Stack gap={3} className="admin-topics-list">
+                      {topics.map((topic) => {
+                        const isEditing = editingTopicId === topic.id;
+                        const currentTitle = isEditing
+                          ? editingTopicForm.title
+                          : topic.title;
+                        const currentDescription = isEditing
+                          ? editingTopicForm.description
+                          : topic.description;
 
-                        <Form.Group controlId="topicDescription" className="mb-3">
-                          <Form.Label>Описание</Form.Label>
-                          <Form.Control
-                            as="textarea"
-                            rows={3}
-                            value={topicDescription}
-                            onChange={(event) =>
-                              setTopicDescription(event.target.value)
-                            }
-                            placeholder="Кратко о теме"
-                          />
-                        </Form.Group>
-
-                        {topicError && (
-                          <Alert variant="warning" className="mb-3">
-                            {topicError}
-                          </Alert>
-                        )}
-
-                        <Button variant="success" type="submit" className="w-100">
-                          Добавить тему
-                        </Button>
-                      </Form>
-                    </CardBody>
-                  </Card>
-                </Col>
-
-                <Col md={6}>
-                  <Card className="h-100 border-0">
-                    <CardBody>
-                      <CardTitle className="fs-5 mb-3">Список тем</CardTitle>
-                      {topics.length === 0 ? (
-                        <Alert variant="info" className="mb-0">
-                          Тем пока нет. Создайте первую тему через форму слева.
-                        </Alert>
-                      ) : (
-                        <Stack gap={3} className="admin-topics-list">
-                          {topics.map((topic) => {
-                            const isEditing = editingTopicId === topic.id;
-                            const currentTitle = isEditing
-                              ? editingTopicForm.title
-                              : topic.title;
-                            const currentDescription = isEditing
-                              ? editingTopicForm.description
-                              : topic.description;
-
-                            return (
-                              <div key={topic.id} className="admin-topic-row">
-                                <div className="admin-topic-row__meta">
-                                  {isEditing ? (
-                                    <Stack gap={2}>
-                                      <Form.Group controlId={`edit-topic-title-${topic.id}`}>
-                                        <Form.Label className="visually-hidden">Название</Form.Label>
-                                        <Form.Control
-                                          type="text"
-                                          value={currentTitle}
-                                          placeholder="Название темы"
-                                          onChange={handleTopicEditChange("title")}
-                                          isInvalid={Boolean(editError && !currentTitle.trim())}
-                                        />
-                                        <Form.Control.Feedback type="invalid">
-                                          Название обязательно.
-                                        </Form.Control.Feedback>
-                                      </Form.Group>
-                                      <Form.Group controlId={`edit-topic-description-${topic.id}`}>
-                                        <Form.Label className="visually-hidden">Описание</Form.Label>
-                                        <Form.Control
-                                          as="textarea"
-                                          rows={2}
-                                          value={currentDescription}
-                                          placeholder="Описание темы"
-                                          onChange={handleTopicEditChange("description")}
-                                        />
-                                      </Form.Group>
-                                      {editError && (
-                                        <div className="text-danger small">{editError}</div>
-                                      )}
-                                    </Stack>
-                                  ) : (
-                                    <>
-                                      <div className="fw-semibold text-break">{currentTitle}</div>
-                                      <div className="text-muted small mb-2 text-break">
-                                        {currentDescription}
-                                      </div>
-                                    </>
+                        return (
+                          <div key={topic.id} className="admin-topic-row">
+                            <div className="admin-topic-row__meta">
+                              {isEditing ? (
+                                <Stack gap={2}>
+                                  <Form.Group controlId={`edit-topic-title-${topic.id}`}>
+                                    <Form.Label className="visually-hidden">Название</Form.Label>
+                                    <Form.Control
+                                      type="text"
+                                      value={currentTitle}
+                                      placeholder="Название темы"
+                                      onChange={handleTopicEditChange("title")}
+                                      isInvalid={Boolean(editError && !currentTitle.trim())}
+                                    />
+                                    <Form.Control.Feedback type="invalid">
+                                      Название обязательно.
+                                    </Form.Control.Feedback>
+                                  </Form.Group>
+                                  <Form.Group controlId={`edit-topic-description-${topic.id}`}>
+                                    <Form.Label className="visually-hidden">Описание</Form.Label>
+                                    <Form.Control
+                                      as="textarea"
+                                      rows={2}
+                                      value={currentDescription}
+                                      placeholder="Описание темы"
+                                      onChange={handleTopicEditChange("description")}
+                                    />
+                                  </Form.Group>
+                                  {editError && (
+                                    <div className="text-danger small">{editError}</div>
                                   )}
-                                  <div className="d-flex align-items-center gap-2 flex-wrap">
-                                    <Badge bg="light" text="dark">
-                                      <i className="bi bi-list-check me-1" aria-hidden="true" />
-                                      {topic.questions.length} вопросов
-                                    </Badge>
+                                </Stack>
+                              ) : (
+                                <>
+                                  <div className="fw-semibold text-break">{currentTitle}</div>
+                                  <div className="text-muted small mb-2 text-break">
+                                    {currentDescription}
                                   </div>
-                                </div>
-
-                                <div className="admin-topic-row__actions">
-                                  {isEditing ? (
-                                    <div className="d-flex flex-wrap gap-2 w-100">
-                                      <Button
-                                        variant="success"
-                                        type="button"
-                                        onClick={handleSaveTopic(topic.id)}
-                                        disabled={!currentTitle.trim()}
-                                      >
-                                        Сохранить
-                                      </Button>
-                                      <Button
-                                        variant="outline-secondary"
-                                        type="button"
-                                        onClick={handleCancelEdit}
-                                      >
-                                        Отмена
-                                      </Button>
-                                    </div>
-                                  ) : (
-                                    <div className="d-flex flex-wrap gap-2 w-100">
-                                      <Button
-                                        variant="outline-primary"
-                                        type="button"
-                                        onClick={handleStartEditTopic(topic)}
-                                      >
-                                        Редактировать
-                                      </Button>
-                                      <Button
-                                        variant="primary"
-                                        type="button"
-                                        className="admin-topic-row__add"
-                                        onClick={handleQuickAddQuestion(topic.id)}
-                                      >
-                                        <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-                                        Вопрос
-                                      </Button>
-                                      <Button
-                                        variant="outline-secondary"
-                                        type="button"
-                                        onClick={handleEditClick(topic.id)}
-                                      >
-                                        Открыть
-                                      </Button>
-                                    </div>
-                                  )}
-                                </div>
+                                </>
+                              )}
+                              <div className="d-flex align-items-center gap-2 flex-wrap">
+                                <Badge bg="light" text="dark">
+                                  <i className="bi bi-list-check me-1" aria-hidden="true" />
+                                  {topic.questions.length} вопросов
+                                </Badge>
                               </div>
-                            );
-                          })}
-                        </Stack>
-                      )}
-                    </CardBody>
-                  </Card>
-                </Col>
-              </Row>
+                            </div>
+
+                            <div className="admin-topic-row__actions">
+                              {isEditing ? (
+                                <div className="d-flex flex-wrap gap-2 w-100">
+                                  <Button
+                                    variant="success"
+                                    type="button"
+                                    onClick={handleSaveTopic(topic.id)}
+                                    disabled={!currentTitle.trim()}
+                                  >
+                                    Сохранить
+                                  </Button>
+                                  <Button
+                                    variant="outline-secondary"
+                                    type="button"
+                                    onClick={handleCancelEdit}
+                                  >
+                                    Отмена
+                                  </Button>
+                                </div>
+                              ) : (
+                                <div className="d-flex flex-wrap gap-2 w-100">
+                                  <Button
+                                    variant="outline-primary"
+                                    type="button"
+                                    onClick={handleStartEditTopic(topic)}
+                                  >
+                                    Редактировать
+                                  </Button>
+                                  <Button
+                                    variant="primary"
+                                    type="button"
+                                    className="admin-topic-row__add"
+                                    onClick={handleQuickAddQuestion(topic.id)}
+                                  >
+                                    <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+                                    Вопрос
+                                  </Button>
+                                  <Button
+                                    variant="outline-secondary"
+                                    type="button"
+                                    onClick={handleEditClick(topic.id)}
+                                  >
+                                    Открыть
+                                  </Button>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </Stack>
+                  </CardBody>
+                </Card>
+              )}
+
+              <Card className="border-0 bg-light-subtle admin-form-card">
+                <CardBody>
+                  <CardTitle className="fs-5 mb-3">Добавить новую тему</CardTitle>
+                  <Form onSubmit={handleCreateTopic}>
+                    <Form.Group controlId="topicTitle" className="mb-3">
+                      <Form.Label>Название</Form.Label>
+                      <Form.Control
+                        type="text"
+                        value={topicTitle}
+                        onChange={(event) => setTopicTitle(event.target.value)}
+                        placeholder='Например, "JavaScript"'
+                        required
+                      />
+                    </Form.Group>
+
+                    <Form.Group controlId="topicDescription" className="mb-3">
+                      <Form.Label>Описание</Form.Label>
+                      <Form.Control
+                        as="textarea"
+                        rows={3}
+                        value={topicDescription}
+                        onChange={(event) => setTopicDescription(event.target.value)}
+                        placeholder="Кратко о теме"
+                      />
+                    </Form.Group>
+
+                    {topicError && (
+                      <Alert variant="warning" className="mb-3">
+                        {topicError}
+                      </Alert>
+                    )}
+
+                    <Button variant="success" type="submit" className="w-100">
+                      Добавить тему
+                    </Button>
+                  </Form>
+                </CardBody>
+              </Card>
             </CardBody>
           </Card>
         </div>

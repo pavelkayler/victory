@@ -68,9 +68,6 @@ const Topics = () => {
                           <i className="bi bi-list-check me-1" aria-hidden="true" />
                           {totalCount} вопросов
                         </span>
-                        <span className="badge bg-info text-dark">
-                          Валидно: {validCount}
-                        </span>
                       </div>
                       <Button
                         variant="primary"
