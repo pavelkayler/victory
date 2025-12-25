@@ -57,8 +57,27 @@ body {
 
 .app-shell .container,
 .app-shell .container-fluid {
-    padding-left: clamp(1rem, 1.5vw, 2rem);
-    padding-right: clamp(1rem, 1.5vw, 2rem);
+    padding-left: clamp(0.5rem, 2.5vw, 1.5rem);
+    padding-right: clamp(0.5rem, 2.5vw, 1.5rem);
+}
+
+.page-section {
+    padding-block: clamp(1rem, 3vw, 3rem);
+}
+
+.page-wrap {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    padding-inline: clamp(0.75rem, 2vw, 1.25rem);
+}
+
+@media (max-width: 576px) {
+    .app-shell .container,
+    .app-shell .container-fluid {
+        padding-left: 0.5rem;
+        padding-right: 0.5rem;
+    }
 }
 
 .quiz-container {
@@ -99,6 +118,10 @@ body {
     align-items: center;
     justify-content: center;
     font-size: clamp(0.95rem, 2vw, 1.05rem);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
 }
 
 .user-header {
@@ -126,6 +149,7 @@ body {
 
 .header-grid__brand {
     justify-self: start;
+    min-width: 0;
 }
 
 .header-grid__center {
@@ -136,6 +160,8 @@ body {
     justify-self: end;
     display: flex;
     align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
 }
 
 .user-footer {
@@ -177,11 +203,22 @@ body {
 }
 
 .header-grid__actions .nav-pill-btn {
-    min-width: 130px;
+    min-width: 0;
 }
 
 .header-finish-btn {
-    min-width: 130px;
+    min-width: 0;
+}
+
+@media (max-width: 360px) {
+    .header-grid__actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .header-grid__actions .nav-pill-btn {
+        width: 100%;
+    }
 }
 
 .user-chip {
@@ -210,7 +247,7 @@ body {
     font-weight: 600;
     font-size: 0.95rem;
     box-shadow: 0 8px 18px rgba(15, 23, 42, 0.06);
-    min-width: 164px;
+    min-width: 0;
     justify-content: center;
     transition: all 0.2s ease;
     cursor: pointer;
@@ -803,7 +840,7 @@ h5 {
     background: linear-gradient(120deg, #fff7ed, #fefce8);
     border: 1px solid #fbbf24;
     font-variant-numeric: tabular-nums;
-    min-width: 140px;
+    min-width: 0;
     justify-content: center;
     color: #92400e;
     font-weight: 800;
@@ -825,6 +862,23 @@ h5 {
     transform: none;
     margin-right: auto;
     z-index: 2;
+}
+
+@media (max-width: 420px) {
+    .quiz-top-bar {
+        flex-wrap: wrap;
+        gap: 0.5rem;
+    }
+
+    .quiz-top-bar .quiz-timer {
+        width: 100%;
+        justify-content: center;
+        margin-right: 0;
+    }
+
+    .header-finish-btn {
+        width: 100%;
+    }
 }
 
 .quiz-timer.is-counting {
