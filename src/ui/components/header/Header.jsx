@@ -3,10 +3,11 @@ import { Link, useLocation } from "react-router-dom";
 import { Navbar, Container, Button } from "react-bootstrap";
 
 import { AdminContext, QuizContext, UserContext } from "../../../core/context/Context.jsx";
+import { UserBar } from "../userBar/UserBar.jsx";
 
 const Header = () => {
   const location = useLocation();
-  const { isAuth } = useContext(UserContext);
+  const { isAuth, userName } = useContext(UserContext);
   const { isAdminAuthed, logoutAdmin } = useContext(AdminContext);
   const {
     topic,
@@ -24,6 +25,7 @@ const Header = () => {
   const isQuizPage = location.pathname === "/quiz";
   const isTopicsPage = location.pathname === "/topics";
   const isHistoryPage = location.pathname === "/history";
+  const isAdminPage = location.pathname.startsWith("/qques");
 
   const timerText = useMemo(() => {
     const safeSeconds = Math.max(0, timeLeft ?? 0);
@@ -64,6 +66,7 @@ const Header = () => {
 
   const showQuizControls = isQuizPage && wasStarted && !isQuizFinished;
   const isCountdownActive = countdownText !== null;
+  const showUserHeaderBar = !showQuizControls && !isAdminPage && Boolean(userName);
 
   return (
     <Navbar
@@ -82,11 +85,9 @@ const Header = () => {
 
             <div className="quiz-scoreboard" aria-label="Счёт">
               <div className="quiz-score quiz-score--ok" title="Верно">
-                <i className="bi bi-check2" aria-hidden="true" />
                 <span className="quiz-score__value">{score}</span>
               </div>
               <div className="quiz-score quiz-score--bad" title="Ошибки">
-                <i className="bi bi-x-lg" aria-hidden="true" />
                 <span className="quiz-score__value">{errorsCount}</span>
               </div>
             </div>
@@ -113,6 +114,7 @@ const Header = () => {
             </Navbar.Brand>
 
             <div className="header-grid__actions">
+              {showUserHeaderBar && <UserBar />}
               <Button
                 variant="outline-primary"
                 className="nav-pill-btn"

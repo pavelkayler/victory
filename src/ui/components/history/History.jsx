@@ -1,13 +1,17 @@
 import { useContext, useMemo, useState } from "react";
 import {
-  Container,
+  Button,
   Card,
   CardBody,
   CardTitle,
-  Row,
   Col,
-  Form,
-  Button,
+  Container,
+  FormLabel,
+  FormSelect,
+  Modal,
+  Row,
+  Toast,
+  ToastContainer,
 } from "react-bootstrap";
 
 import {
@@ -25,6 +29,9 @@ const History = () => {
   useAuthGuard();
 
   const [selectedTopicId, setSelectedTopicId] = useState("all");
+  const [isConfirmOpen, setIsConfirmOpen] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
+  const [showToast, setShowToast] = useState(false);
 
   const userHistory = useMemo(
     () => quizHistory.filter((attempt) => attempt.userName === userName),
@@ -59,12 +66,22 @@ const History = () => {
   };
 
   const handleClearHistory = () => {
-    const confirmed = window.confirm("Очистить историю?");
-    if (!confirmed) {
-      return;
-    }
-
     clearHistory();
+    setToastMessage("История очищена");
+    setShowToast(true);
+  };
+
+  const handleConfirmClear = () => {
+    handleClearHistory();
+    setIsConfirmOpen(false);
+  };
+
+  const openConfirm = () => {
+    setIsConfirmOpen(true);
+  };
+
+  const closeConfirm = () => {
+    setIsConfirmOpen(false);
   };
 
   return (
@@ -76,10 +93,11 @@ const History = () => {
               Журнал прохождений викторины
             </CardTitle>
 
-            <Row className="gy-2 gx-3 align-items-center mb-3">
-              <Col xs={12} md={6}>
-                <Form.Label className="fw-semibold d-block mb-1">Фильтр по теме</Form.Label>
-                <Form.Select
+            <Row className="gy-2 gx-3 align-items-center">
+              <Col xs={12} md={6} className="mx-auto history-filter-wrap">
+                <FormLabel className="fw-semibold d-block mb-1">Фильтр по теме</FormLabel>
+                <FormSelect
+                  className="w-100"
                   value={selectedTopicId}
                   onChange={(event) => setSelectedTopicId(event.target.value)}
                 >
@@ -89,10 +107,13 @@ const History = () => {
                       {topic.title}
                     </option>
                   ))}
-                </Form.Select>
+                </FormSelect>
               </Col>
-              <Col xs={12} md={12} className="d-flex justify-content-center align-items-end">
-                <Button variant="outline-danger" onClick={handleClearHistory}>
+            </Row>
+
+            <Row className="mt-3">
+              <Col xs={12} className="d-flex justify-content-center align-items-end">
+                <Button variant="outline-danger" onClick={openConfirm}>
                   Очистить историю
                 </Button>
               </Col>
@@ -153,6 +174,33 @@ const History = () => {
           </CardBody>
         </Card>
       </div>
+
+      <Modal show={isConfirmOpen} onHide={closeConfirm} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Подтвердите очистку</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>История будет удалена. Продолжить?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={closeConfirm}>
+            Отмена
+          </Button>
+          <Button variant="danger" onClick={handleConfirmClear}>
+            Очистить
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <ToastContainer position="top-center" className="mt-3">
+        <Toast
+          bg="success"
+          onClose={() => setShowToast(false)}
+          show={showToast}
+          delay={2400}
+          autohide
+        >
+          <Toast.Body className="text-white">{toastMessage}</Toast.Body>
+        </Toast>
+      </ToastContainer>
     </Container>
   );
 };

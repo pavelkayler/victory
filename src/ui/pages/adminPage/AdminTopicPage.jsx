@@ -1,7 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import {
-  Alert,
   Badge,
   Button,
   Card,
@@ -10,9 +9,15 @@ import {
   CardTitle,
   Col,
   Container,
-  Form,
+  FormControl,
+  FormGroup,
+  FormLabel,
+  FormSelect,
+  Modal,
   Row,
   Stack,
+  Toast,
+  ToastContainer,
 } from "react-bootstrap";
 
 import { TopicsContext } from "../../../core/context/Context.jsx";
@@ -27,7 +32,7 @@ const SORT_MODES = {
 
 const AdminTopicPage = () => {
   const { topicId } = useParams();
-  const { getTopicById, updateQuestion, addQuestion, deleteQuestion } =
+  const { getTopicById, updateQuestion, addQuestion, deleteQuestion, updateTopic } =
     useContext(TopicsContext);
   const location = useLocation();
   const isAllowed = useAdminGuard();
@@ -37,13 +42,28 @@ const AdminTopicPage = () => {
   const [sortMode, setSortMode] = useState(SORT_MODES.fill);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
   const [questionDrafts, setQuestionDrafts] = useState({});
+  const [isEditingTopicMeta, setIsEditingTopicMeta] = useState(false);
+  const [topicTitleDraft, setTopicTitleDraft] = useState("");
+  const [topicDescriptionDraft, setTopicDescriptionDraft] = useState("");
+  const [toastState, setToastState] = useState({
+    show: false,
+    message: "",
+    bg: "success",
+  });
+  const [pendingDeleteId, setPendingDeleteId] = useState(null);
+  const [draftQuestion, setDraftQuestion] = useState(null);
 
   useEffect(() => {
     if (!topic) {
       setQuestionDrafts({});
+      setTopicTitleDraft("");
+      setTopicDescriptionDraft("");
+      setDraftQuestion(null);
       return;
     }
 
+    setTopicTitleDraft(topic.title ?? "");
+    setTopicDescriptionDraft(topic.description ?? "");
     setQuestionDrafts((prev) => {
       const next = {};
       topic.questions.forEach((question) => {
@@ -74,48 +94,72 @@ const AdminTopicPage = () => {
 
   const questions = topic?.questions ?? [];
 
+  const showToast = (message, bg = "success") => {
+    setToastState({ show: true, message, bg });
+  };
+
+  const compareByField = (aValue, bValue) => {
+    const leftText = (aValue ?? "").trim();
+    const rightText = (bValue ?? "").trim();
+    const isLeftEmpty = leftText === "";
+    const isRightEmpty = rightText === "";
+
+    if (isLeftEmpty && !isRightEmpty) {
+      return 1;
+    }
+    if (!isLeftEmpty && isRightEmpty) {
+      return -1;
+    }
+
+    return leftText.localeCompare(rightText, "ru", { sensitivity: "base" });
+  };
+
   const displayedQuestions = useMemo(() => {
     const sorted = [...questions];
 
     sorted.sort((a, b) => {
       if (sortMode === SORT_MODES.left) {
-        return (a.left ?? "").localeCompare(b.left ?? "", "ru", { sensitivity: "base" });
+        return compareByField(a.left, b.left);
       }
 
       if (sortMode === SORT_MODES.right) {
-        return (a.right ?? "").localeCompare(b.right ?? "", "ru", { sensitivity: "base" });
+        return compareByField(a.right, b.right);
       }
 
       const aValid = isQuestionValid(a);
       const bValid = isQuestionValid(b);
 
       if (aValid === bValid) {
-        return a.id - b.id;
+        return compareByField(a.left, b.left);
       }
 
       return Number(aValid) - Number(bValid);
     });
 
+    if (draftQuestion) {
+      return [draftQuestion, ...sorted];
+    }
+
     return sorted;
-  }, [questions, sortMode]);
+  }, [questions, sortMode, draftQuestion]);
 
   const handleAddQuestion = () => {
     if (!topic) {
       return;
     }
-    const newQuestion = addQuestion(
-      topic.id,
-      { left: "", right: "" },
-      { allowDraft: true },
-    );
-    if (newQuestion) {
-      setQuestionDrafts((prev) => ({
-        ...prev,
-        [newQuestion.id]: { left: "", right: "" },
-      }));
-      setEditingQuestionId(newQuestion.id);
-      setHighlightedId(newQuestion.id);
+    if (draftQuestion) {
+      setEditingQuestionId(draftQuestion.id);
+      return;
     }
+
+    const nextDraft = { id: "draft", left: "", right: "" };
+    setDraftQuestion(nextDraft);
+    setQuestionDrafts((prev) => ({
+      ...prev,
+      [nextDraft.id]: { left: "", right: "" },
+    }));
+    setEditingQuestionId(nextDraft.id);
+    setHighlightedId(nextDraft.id);
   };
 
   const handleDraftChange = (questionId, field) => (event) => {
@@ -134,6 +178,17 @@ const AdminTopicPage = () => {
   };
 
   const handleCancelEdit = (question) => () => {
+    if (question.id === "draft") {
+      setDraftQuestion(null);
+      setEditingQuestionId(null);
+      setQuestionDrafts((prev) => {
+        const next = { ...prev };
+        delete next[question.id];
+        return next;
+      });
+      return;
+    }
+
     setQuestionDrafts((prev) => ({
       ...prev,
       [question.id]: {
@@ -145,21 +200,24 @@ const AdminTopicPage = () => {
   };
 
   const handleDeleteQuestion = (questionId) => () => {
-    if (!topic) {
-      return;
-    }
-    const confirmed = window.confirm("Удалить вопрос?");
-    if (!confirmed) {
+    setPendingDeleteId(questionId);
+  };
+
+  const handleConfirmDelete = () => {
+    if (!topic || pendingDeleteId === null) {
+      setPendingDeleteId(null);
       return;
     }
 
-    deleteQuestion(topic.id, questionId);
-    setEditingQuestionId((prev) => (prev === questionId ? null : prev));
+    deleteQuestion(topic.id, pendingDeleteId);
+    setEditingQuestionId((prev) => (prev === pendingDeleteId ? null : prev));
     setQuestionDrafts((prev) => {
       const next = { ...prev };
-      delete next[questionId];
+      delete next[pendingDeleteId];
       return next;
     });
+    setPendingDeleteId(null);
+    showToast("Вопрос удалён");
   };
 
   const handleSaveQuestion = (questionId) => () => {
@@ -182,6 +240,26 @@ const AdminTopicPage = () => {
       return;
     }
 
+    if (questionId === "draft") {
+      const created = addQuestion(
+        topic.id,
+        { left: trimmedLeft, right: trimmedRight },
+        { allowDraft: false },
+      );
+      if (created) {
+        setQuestionDrafts((prev) => {
+          const next = { ...prev };
+          delete next.draft;
+          return next;
+        });
+        setDraftQuestion(null);
+        setEditingQuestionId(null);
+        setHighlightedId(created.id);
+        showToast("Сохранено");
+      }
+      return;
+    }
+
     updateQuestion(
       topic.id,
       questionId,
@@ -192,6 +270,35 @@ const AdminTopicPage = () => {
       { allowDraft: false },
     );
     setEditingQuestionId(null);
+    showToast("Сохранено");
+  };
+
+  const handleStartEditTopicMeta = () => {
+    setIsEditingTopicMeta(true);
+  };
+
+  const handleSaveTopicMeta = () => {
+    if (!topic) {
+      return;
+    }
+    const trimmedTitle = topicTitleDraft.trim();
+
+    if (!trimmedTitle) {
+      return;
+    }
+
+    updateTopic(topic.id, {
+      title: trimmedTitle,
+      description: topicDescriptionDraft,
+    });
+    setIsEditingTopicMeta(false);
+    showToast("Тема сохранена");
+  };
+
+  const handleCancelTopicMeta = () => {
+    setTopicTitleDraft(topic?.title ?? "");
+    setTopicDescriptionDraft(topic?.description ?? "");
+    setIsEditingTopicMeta(false);
   };
 
   if (!isAllowed) {
@@ -232,7 +339,7 @@ const AdminTopicPage = () => {
               </Button>
             </Col>
             <Col xs="auto">
-              <Form.Select
+              <FormSelect
                 size="sm"
                 value={sortMode}
                 onChange={(event) => setSortMode(event.target.value)}
@@ -240,28 +347,101 @@ const AdminTopicPage = () => {
                 <option value={SORT_MODES.fill}>Сначала незаполненные</option>
                 <option value={SORT_MODES.left}>A→Z по левой колонке</option>
                 <option value={SORT_MODES.right}>A→Z по правой колонке</option>
-              </Form.Select>
+              </FormSelect>
             </Col>
           </Row>
 
           <Card className="shadow-sm page-card">
             <CardBody>
-              <div className="d-flex align-items-start gap-3 mb-2 flex-wrap">
-                <CardTitle className="fs-3 mb-0">{topic.title}</CardTitle>
-                <Badge bg="light" text="dark" className="align-self-center">
-                  <i className="bi bi-list-check me-1" aria-hidden="true" />
-                  {questions.length} вопросов
-                </Badge>
+              <div className="d-flex align-items-start gap-3 mb-3 flex-wrap">
+                <div className="flex-grow-1">
+                  <div className="d-flex align-items-start gap-3 flex-wrap">
+                    {isEditingTopicMeta ? (
+                      <div className="w-100">
+                        <FormGroup controlId="topicTitleEdit" className="mb-3">
+                          <FormLabel>Название темы</FormLabel>
+                          <FormControl
+                            type="text"
+                            value={topicTitleDraft}
+                            onChange={(event) => setTopicTitleDraft(event.target.value)}
+                            placeholder="Название темы"
+                          />
+                        </FormGroup>
+                        <FormGroup controlId="topicDescriptionEdit" className="mb-3">
+                          <FormLabel>Описание темы</FormLabel>
+                          <FormControl
+                            as="textarea"
+                            rows={3}
+                            value={topicDescriptionDraft}
+                            onChange={(event) => setTopicDescriptionDraft(event.target.value)}
+                            placeholder="Описание темы"
+                          />
+                        </FormGroup>
+                        <div className="d-flex flex-wrap gap-2">
+                          <Button
+                            variant="success"
+                            type="button"
+                            onClick={handleSaveTopicMeta}
+                            disabled={!topicTitleDraft.trim()}
+                          >
+                            Сохранить
+                          </Button>
+                          <Button
+                            variant="outline-secondary"
+                            type="button"
+                            onClick={handleCancelTopicMeta}
+                          >
+                            Отмена
+                          </Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <>
+                        <CardTitle className="fs-3 mb-0">{topic.title}</CardTitle>
+                        <Badge bg="light" text="dark" className="align-self-center">
+                          <i className="bi bi-list-check me-1" aria-hidden="true" />
+                          {questions.length} вопросов
+                        </Badge>
+                        <Button
+                          variant="outline-primary"
+                          size="sm"
+                          type="button"
+                          onClick={handleStartEditTopicMeta}
+                          className="align-self-center"
+                        >
+                          Редактировать тему
+                        </Button>
+                      </>
+                    )}
+                  </div>
+                  {!isEditingTopicMeta && (
+                    <CardSubtitle className="text-muted mb-2 admin-topic-subtitle">
+                      {topic.description}
+                    </CardSubtitle>
+                  )}
+                </div>
+                <Button
+                  variant="success"
+                  onClick={handleAddQuestion}
+                  className="d-none d-md-inline-flex"
+                >
+                  <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+                  Добавить вопрос
+                </Button>
               </div>
-              <CardSubtitle className="text-muted mb-4">
-                Редактируйте карточки. Незаполненные вопросы помечены отдельно.
-              </CardSubtitle>
+
+              <div className="d-flex d-md-none justify-content-start mt-2 mb-3">
+                <Button variant="success" onClick={handleAddQuestion}>
+                  <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+                  Добавить вопрос
+                </Button>
+              </div>
 
               <Stack gap={3} className="admin-questions-list">
-                {questions.length === 0 && (
-                  <Alert variant="info" className="mb-0">
+                {questions.length === 0 && !draftQuestion && (
+                  <div className="text-muted">
                     В этой теме ещё нет вопросов. Добавьте первый!
-                  </Alert>
+                  </div>
                 )}
 
                 {displayedQuestions.map((question) => {
@@ -274,7 +454,8 @@ const AdminTopicPage = () => {
                     ? "Заполните правую колонку"
                     : "";
                   const isEditing = editingQuestionId === question.id;
-                  const isValid = isQuestionValid(question);
+                  const isValid = question.id === "draft" ? false : isQuestionValid(question);
+                  const isDraft = question.id === "draft";
 
                   return (
                     <Card
@@ -285,7 +466,7 @@ const AdminTopicPage = () => {
                         <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
                           <div className="d-flex align-items-center gap-2 flex-wrap">
                             <span className="fw-semibold">
-                              №{question.id.toString().padStart(2, "0")}
+                              {isDraft ? "Новый" : `№${question.id.toString().padStart(2, "0")}`}
                             </span>
                             {!isValid && (
                               <Badge bg="warning" text="dark">
@@ -308,7 +489,7 @@ const AdminTopicPage = () => {
                                 variant="outline-danger"
                                 type="button"
                                 onClick={handleDeleteQuestion(question.id)}
-                              >
+                                >
                                 Удалить
                               </Button>
                             </div>
@@ -317,36 +498,48 @@ const AdminTopicPage = () => {
 
                         <Row className="g-3">
                           <Col md={6}>
-                            <Form.Group controlId={`question-left-${question.id}`}>
-                              <Form.Label>Левая колонка</Form.Label>
-                              <Form.Control
-                                type="text"
-                                value={draft.left}
-                                placeholder="Фраза или вопрос"
-                                onChange={handleDraftChange(question.id, "left")}
-                                disabled={!isEditing}
-                                isInvalid={isEditing && Boolean(leftError)}
-                              />
-                              {isEditing && leftError && (
-                                <Form.Text className="text-danger">{leftError}</Form.Text>
+                            <FormGroup controlId={`question-left-${question.id}`}>
+                              <FormLabel>Левая колонка</FormLabel>
+                              {isEditing ? (
+                                <>
+                                  <FormControl
+                                    as="textarea"
+                                    rows={2}
+                                    value={draft.left}
+                                    placeholder="Фраза или вопрос"
+                                    onChange={handleDraftChange(question.id, "left")}
+                                    isInvalid={Boolean(leftError)}
+                                  />
+                                  {leftError && (
+                                    <div className="text-danger small mt-1">{leftError}</div>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="admin-question-text">{draft.left}</div>
                               )}
-                            </Form.Group>
+                            </FormGroup>
                           </Col>
                           <Col md={6}>
-                            <Form.Group controlId={`question-right-${question.id}`}>
-                              <Form.Label>Правая колонка</Form.Label>
-                              <Form.Control
-                                type="text"
-                                value={draft.right}
-                                placeholder="Ответ или соответствие"
-                                onChange={handleDraftChange(question.id, "right")}
-                                disabled={!isEditing}
-                                isInvalid={isEditing && Boolean(rightError)}
-                              />
-                              {isEditing && rightError && (
-                                <Form.Text className="text-danger">{rightError}</Form.Text>
+                            <FormGroup controlId={`question-right-${question.id}`}>
+                              <FormLabel>Правая колонка</FormLabel>
+                              {isEditing ? (
+                                <>
+                                  <FormControl
+                                    as="textarea"
+                                    rows={2}
+                                    value={draft.right}
+                                    placeholder="Ответ или соответствие"
+                                    onChange={handleDraftChange(question.id, "right")}
+                                    isInvalid={Boolean(rightError)}
+                                  />
+                                  {rightError && (
+                                    <div className="text-danger small mt-1">{rightError}</div>
+                                  )}
+                                </>
+                              ) : (
+                                <div className="admin-question-text">{draft.right}</div>
                               )}
-                            </Form.Group>
+                            </FormGroup>
                           </Col>
                         </Row>
 
@@ -374,17 +567,37 @@ const AdminTopicPage = () => {
                   );
                 })}
               </Stack>
-
-              <div className="d-flex justify-content-end mt-4">
-                <Button variant="success" onClick={handleAddQuestion}>
-                  <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-                  Добавить вопрос
-                </Button>
-              </div>
             </CardBody>
           </Card>
         </div>
       </Container>
+
+      <Modal show={pendingDeleteId !== null} onHide={() => setPendingDeleteId(null)} centered>
+        <Modal.Header closeButton>
+          <Modal.Title>Удалить вопрос?</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>Действие нельзя отменить. Продолжить?</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setPendingDeleteId(null)}>
+            Отмена
+          </Button>
+          <Button variant="danger" onClick={handleConfirmDelete}>
+            Удалить
+          </Button>
+        </Modal.Footer>
+      </Modal>
+
+      <ToastContainer position="top-center" className="mt-3">
+        <Toast
+          bg={toastState.bg}
+          onClose={() => setToastState((prev) => ({ ...prev, show: false }))}
+          show={toastState.show}
+          delay={2400}
+          autohide
+        >
+          <Toast.Body className="text-white">{toastState.message}</Toast.Body>
+        </Toast>
+      </ToastContainer>
     </div>
   );
 };

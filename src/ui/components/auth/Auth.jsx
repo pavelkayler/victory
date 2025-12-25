@@ -38,6 +38,7 @@ const Auth = () => {
                     placeholder="Введите имя"
                     value={name}
                     onChange={(event) => setName(event.target.value)}
+                    maxLength={60}
                     required
                   />
                 </FormGroup>
