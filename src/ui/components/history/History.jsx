@@ -91,7 +91,7 @@ const History = () => {
                   ))}
                 </Form.Select>
               </Col>
-              <Col xs={12} md={6} className="d-flex justify-content-md-end align-items-end">
+              <Col xs={12} md={12} className="d-flex justify-content-center align-items-end">
                 <Button variant="outline-danger" onClick={handleClearHistory}>
                   Очистить историю
                 </Button>

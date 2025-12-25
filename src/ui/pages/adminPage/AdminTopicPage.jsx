@@ -226,7 +226,7 @@ const AdminTopicPage = () => {
         <div className="page-wrap">
           <Row className="mb-3 align-items-center">
             <Col>
-              <Button as={Link} to="/qques" variant="outline-primary">
+              <Button as={Link} to="/qques" variant="outline-primary" size="sm" className="admin-back-btn">
                 <i className="bi bi-arrow-left-short me-2" aria-hidden="true" />
                 К списку тем
               </Button>

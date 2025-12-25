@@ -1,12 +1,13 @@
-import { useContext, useMemo } from "react";
+import { useContext, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Navbar, Container, Button } from "react-bootstrap";
 
-import { QuizContext, UserContext } from "../../../core/context/Context.jsx";
+import { AdminContext, QuizContext, UserContext } from "../../../core/context/Context.jsx";
 
 const Header = () => {
   const location = useLocation();
   const { isAuth } = useContext(UserContext);
+  const { isAdminAuthed, logoutAdmin } = useContext(AdminContext);
   const {
     topic,
     timeLeft,
@@ -16,6 +17,8 @@ const Header = () => {
     countdown,
     finishQuiz,
     resetTopic,
+    score,
+    errorsCount,
   } = useContext(QuizContext);
 
   const isQuizPage = location.pathname === "/quiz";
@@ -40,6 +43,16 @@ const Header = () => {
 
     return countdown === 0 ? "Старт" : String(countdown);
   }, [countdown]);
+
+  useEffect(() => {
+    if (!isAdminAuthed) {
+      return;
+    }
+
+    if (!location.pathname.startsWith("/qques")) {
+      logoutAdmin();
+    }
+  }, [isAdminAuthed, location.pathname, logoutAdmin]);
 
   if (!isAuth) {
     return null;
@@ -67,9 +80,20 @@ const Header = () => {
               <span className="fw-semibold">{isCountdownActive ? countdownText : timerText}</span>
             </div>
 
+            <div className="quiz-scoreboard" aria-label="Счёт">
+              <div className="quiz-score quiz-score--ok" title="Верно">
+                <i className="bi bi-check2" aria-hidden="true" />
+                <span className="quiz-score__value">{score}</span>
+              </div>
+              <div className="quiz-score quiz-score--bad" title="Ошибки">
+                <i className="bi bi-x-lg" aria-hidden="true" />
+                <span className="quiz-score__value">{errorsCount}</span>
+              </div>
+            </div>
+
             <Button
               variant="outline-danger"
-              className="header-finish-btn ms-auto"
+              className="header-finish-btn"
               type="button"
               onClick={finishQuiz}
               disabled={!isRunning}
