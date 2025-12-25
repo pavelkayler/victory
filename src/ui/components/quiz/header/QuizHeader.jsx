@@ -11,7 +11,7 @@ const QuizHeader = ({
   isFadingOut,
   showIntroCard,
 }) => {
-  const { currentPrompt, topic } = useContext(QuizContext);
+  const { currentPrompt, topic, startError } = useContext(QuizContext);
 
   const centerText = !hasStarted && currentPrompt ? currentPrompt.text : "";
   const titleText = topic?.title || "Подборка вопросов";
@@ -40,6 +40,11 @@ const QuizHeader = ({
             >
               Начать
             </Button>
+            {startError && (
+              <p className="text-danger small mt-2 mb-0 text-center w-100">
+                {startError}
+              </p>
+            )}
           </div>
         </div>
       )}

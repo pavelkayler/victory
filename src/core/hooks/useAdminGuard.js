@@ -9,7 +9,7 @@ const useAdminGuard = () => {
 
   useEffect(() => {
     if (!isAdminAuthed) {
-      navigate("/", { replace: true });
+      navigate("/qques", { replace: true });
     }
   }, [isAdminAuthed, navigate]);
 

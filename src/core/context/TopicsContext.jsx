@@ -65,8 +65,44 @@ const TopicsProvider = ({ children }) => {
     return newTopic;
   }, []);
 
-  const addQuestion = useCallback((topicId, { left = "", right = "" }) => {
+  const updateTopic = useCallback((topicId, patch) => {
+    const trimmedTitle =
+      patch.title !== undefined ? patch.title.trim() : undefined;
+    const trimmedDescription =
+      patch.description !== undefined ? patch.description.trim() : undefined;
+
+    if (trimmedTitle === undefined && trimmedDescription === undefined) {
+      return;
+    }
+
+    setTopics((prev) =>
+      prev.map((topic) => {
+        if (topic.id !== topicId) {
+          return topic;
+        }
+
+        if (trimmedTitle !== undefined && trimmedTitle === "") {
+          return topic;
+        }
+
+        return {
+          ...topic,
+          title: trimmedTitle ?? topic.title,
+          description: trimmedDescription ?? topic.description,
+        };
+      }),
+    );
+  }, []);
+
+  const addQuestion = useCallback((topicId, { left = "", right = "" }, { allowDraft = false } = {}) => {
     let createdQuestion = null;
+
+    const trimmedLeft = left.trim();
+    const trimmedRight = right.trim();
+
+    if (!allowDraft && (trimmedLeft === "" || trimmedRight === "")) {
+      return null;
+    }
 
     setTopics((prev) =>
       prev.map((topic) => {
@@ -79,8 +115,8 @@ const TopicsProvider = ({ children }) => {
 
         createdQuestion = {
           id: nextId,
-          left,
-          right,
+          left: trimmedLeft,
+          right: trimmedRight,
         };
 
         return {
@@ -93,7 +129,7 @@ const TopicsProvider = ({ children }) => {
     return createdQuestion;
   }, []);
 
-  const updateQuestion = useCallback((topicId, questionId, updates) => {
+  const updateQuestion = useCallback((topicId, questionId, updates, { allowDraft = false } = {}) => {
     setTopics((prev) =>
       prev.map((topic) => {
         if (topic.id !== topicId) {
@@ -103,8 +139,42 @@ const TopicsProvider = ({ children }) => {
         return {
           ...topic,
           questions: topic.questions.map((question) =>
-            question.id === questionId ? { ...question, ...updates } : question,
+            question.id === questionId
+              ? (() => {
+                const nextLeft = updates.left !== undefined
+                  ? updates.left.trim()
+                  : question.left;
+                const nextRight = updates.right !== undefined
+                  ? updates.right.trim()
+                  : question.right;
+
+                if (!allowDraft && (nextLeft === "" || nextRight === "")) {
+                  return question;
+                }
+
+                return {
+                  ...question,
+                  left: nextLeft,
+                  right: nextRight,
+                };
+              })()
+              : question,
           ),
+        };
+      }),
+    );
+  }, []);
+
+  const deleteQuestion = useCallback((topicId, questionId) => {
+    setTopics((prev) =>
+      prev.map((topic) => {
+        if (topic.id !== topicId) {
+          return topic;
+        }
+
+        return {
+          ...topic,
+          questions: topic.questions.filter((question) => question.id !== questionId),
         };
       }),
     );
@@ -115,10 +185,12 @@ const TopicsProvider = ({ children }) => {
       topics,
       getTopicById,
       addTopic,
+      updateTopic,
       addQuestion,
       updateQuestion,
+      deleteQuestion,
     }),
-    [topics, getTopicById, addTopic, addQuestion, updateQuestion],
+    [topics, getTopicById, addTopic, updateTopic, addQuestion, updateQuestion, deleteQuestion],
   );
 
   return <TopicsContext.Provider value={value}>{children}</TopicsContext.Provider>;

@@ -39,10 +39,20 @@ const HistoryProvider = ({ children }) => {
     ]);
   };
 
+  const clearHistory = () => {
+    setQuizHistory([]);
+    try {
+      localStorage.removeItem(HISTORY_STORAGE_KEY);
+    } catch (error) {
+      console.error("Failed to clear history", error);
+    }
+  };
+
   const value = useMemo(
     () => ({
       quizHistory,
       addQuizAttempt,
+      clearHistory,
     }),
     [quizHistory],
   );
