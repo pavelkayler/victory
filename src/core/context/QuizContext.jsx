@@ -10,6 +10,8 @@ import {
 import { UserContext } from "./UserContext.jsx";
 import { HistoryContext } from "./HistoryContext.jsx";
 import { TopicsContext } from "./TopicsContext.jsx";
+import { MIN_PAIRS } from "../constants/quiz.js";
+import { isQuestionValid } from "../utils/questions.js";
 
 const QuizContext = createContext(null);
 
@@ -122,6 +124,7 @@ const QuizProvider = ({ children }) => {
 
   const [streak, setStreak] = useState(0); // количество подряд верных ответов
   const [bestStreak, setBestStreak] = useState(0);
+  const [startError, setStartError] = useState(null);
 
   // подготовка квиза (после выбора темы)
   const initQuiz = useCallback((nextTopic = null) => {
@@ -132,9 +135,11 @@ const QuizProvider = ({ children }) => {
     }
 
     setTopic(selectedTopic);
-    setQuestions(selectedTopic.questions);
+    const validQuestions = (selectedTopic.questions ?? []).filter(isQuestionValid);
 
-    const newColumns = createColumns(selectedTopic.questions);
+    setQuestions(validQuestions);
+
+    const newColumns = createColumns(validQuestions);
 
     setColumns(newColumns);
     setCurrentPrompt(null);
@@ -155,10 +160,12 @@ const QuizProvider = ({ children }) => {
     setSessionId((prev) => prev + 1);
     setCompletedSessionId(null);
     setCountdown(null);
+    setStartError(null);
   }, [topic, topics]);
 
   const resetTopic = useCallback(() => {
     setTopic(null);
+    setStartError(null);
   }, []);
 
   useEffect(() => {
@@ -167,24 +174,76 @@ const QuizProvider = ({ children }) => {
     }
   }, [initQuiz, topic, topics]);
 
+  useEffect(() => {
+    if (!topic) {
+      return;
+    }
+
+    const updatedTopic = topics.find((item) => item.id === topic.id);
+
+    if (updatedTopic && updatedTopic !== topic) {
+      const validQuestions = (updatedTopic.questions ?? []).filter(isQuestionValid);
+      setTopic(updatedTopic);
+      setQuestions(validQuestions);
+      setColumns(createColumns(validQuestions));
+    }
+  }, [topic, topics]);
+
+  useEffect(() => {
+    const activeTopic = topics.find((item) => item.id === topic?.id) ?? topic ?? topics[0];
+    const validCount = (activeTopic?.questions ?? []).filter(isQuestionValid).length;
+
+    if (validCount >= MIN_PAIRS) {
+      setStartError(null);
+    }
+  }, [topic, topics]);
+
   // старт: первый рандом + включаем таймер
   const startQuiz = useCallback(() => {
+    const activeTopic = topics.find((item) => item.id === topic?.id) ?? topic ?? topics[0];
+    const validQuestions = (activeTopic?.questions ?? []).filter(isQuestionValid);
+
+    if (validQuestions.length < MIN_PAIRS) {
+      setStartError(`Недостаточно вопросов для старта: нужно минимум ${MIN_PAIRS}.`);
+      setIsRunning(false);
+      setCountdown(null);
+      setWasStarted(false);
+      return;
+    }
+
+    setStartError(null);
+    setQuestions(validQuestions);
+    const nextColumns = createColumns(validQuestions);
+    setColumns(nextColumns);
+
     setIsRunning(true);
 
     setCurrentPrompt((prevPrompt) => {
       const prevPairId = prevPrompt ? prevPrompt.pairId : null;
-      return pickRandomPrompt(columns, prevPairId);
+      return pickRandomPrompt(nextColumns, prevPairId);
     });
-  }, [columns]);
+  }, [topic, topics]);
 
   const startCountdown = useCallback(() => {
     if (wasStarted || countdown !== null || isQuizFinished) {
       return;
     }
 
+    const activeTopic = topics.find((item) => item.id === topic?.id) ?? topic ?? topics[0];
+    const validQuestions = (activeTopic?.questions ?? []).filter(isQuestionValid);
+
+    if (!activeTopic || validQuestions.length < MIN_PAIRS) {
+      setStartError(`Недостаточно вопросов для старта: минимум ${MIN_PAIRS}.`);
+      return;
+    }
+
+    setStartError(null);
+    setTopic(activeTopic);
+    setQuestions(validQuestions);
+    setColumns(createColumns(validQuestions));
     setWasStarted(true);
     setCountdown(3);
-  }, [countdown, isQuizFinished, wasStarted]);
+  }, [countdown, isQuizFinished, topic, topics, wasStarted]);
 
   const resetCounters = useCallback(() => {
     setScore(0);
@@ -324,6 +383,7 @@ const QuizProvider = ({ children }) => {
       wrong: errorsCount,
       durationSec,
       streak: bestStreak,
+      topicId: topic?.id ?? null,
       topicTitle: topic?.title ?? "",
     });
   }, [
@@ -365,6 +425,7 @@ const QuizProvider = ({ children }) => {
       resetTopic,
       finishQuiz,
       handleItemClick,
+      startError,
     }),
     [
       questions,
@@ -391,6 +452,7 @@ const QuizProvider = ({ children }) => {
       resetTopic,
       finishQuiz,
       handleItemClick,
+      startError,
     ],
   );
 
