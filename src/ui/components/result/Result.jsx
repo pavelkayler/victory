@@ -2,8 +2,6 @@ import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Container,
-  Row,
-  Col,
   Card,
   CardBody,
   CardTitle,
@@ -36,10 +34,10 @@ const Result = () => {
   };
 
   return (
-    <Container className="py-5">
-      <Row className="justify-content-center mb-4">
-        <Col md={6}>
-          <Card className="p-4 shadow-sm page-card text-center">
+    <Container fluid className="page-section">
+      <div className="page-wrap">
+        <div className="d-flex flex-column gap-4">
+          <Card className="shadow-sm page-card text-center">
             <CardBody>
               <CardTitle className="fs-3 mb-3"><i className="bi bi-trophy-fill me-2 text-warning" />Результат</CardTitle>
               <CardText className="fs-5 mb-2">
@@ -57,12 +55,8 @@ const Result = () => {
               </Button>
             </CardBody>
           </Card>
-        </Col>
-      </Row>
 
-      <Row className="justify-content-center">
-        <Col md={8}>
-          <Card className="p-4 shadow-sm">
+          <Card className="shadow-sm page-card">
             <CardBody>
               <CardTitle className="fs-4 mb-3">
                 Вопросы и ответы викторины
@@ -80,8 +74,8 @@ const Result = () => {
               </ListGroup>
             </CardBody>
           </Card>
-        </Col>
-      </Row>
+        </div>
+      </div>
     </Container>
   );
 };
