@@ -160,6 +160,58 @@ body {
     white-space: nowrap;
 }
 
+.user-header-mobile-actions {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 100%;
+    padding-inline: clamp(0.6rem, 2vw, 1rem);
+}
+
+.user-header-mobile-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.user-header-mobile-user-row {
+    padding-inline: clamp(0.6rem, 2vw, 1rem);
+    padding-top: 0.65rem;
+}
+
+.user-header-mobile-user {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    max-width: 100%;
+    width: 100%;
+}
+
+.user-header-mobile-identity {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    flex: 1 1 0;
+}
+
+.user-header-mobile-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-header-mobile-logout {
+    flex-shrink: 0;
+    white-space: nowrap;
+}
+
 .header-logout-btn {
     white-space: nowrap;
 }
@@ -529,6 +581,52 @@ h5 {
     box-shadow: 0 12px 24px rgba(59, 130, 246, 0.1);
 }
 
+.list-group-item.quiz-item.match-card--left {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(234, 242, 255, 0.95));
+    border-color: rgba(59, 130, 246, 0.34);
+    box-shadow: 0 12px 26px rgba(59, 130, 246, 0.14);
+}
+
+.list-group-item.quiz-item.match-card--right {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.1), rgba(242, 237, 255, 0.95));
+    border-color: rgba(124, 58, 237, 0.28);
+    box-shadow: 0 12px 26px rgba(124, 58, 237, 0.12);
+}
+
+.list-group-item.quiz-item.match-card--left:hover {
+    background: linear-gradient(135deg, rgba(59, 130, 246, 0.14), rgba(226, 239, 255, 0.98));
+    box-shadow: 0 14px 26px rgba(59, 130, 246, 0.18);
+}
+
+.list-group-item.quiz-item.match-card--right:hover {
+    background: linear-gradient(135deg, rgba(129, 140, 248, 0.16), rgba(237, 232, 255, 0.98));
+    box-shadow: 0 14px 26px rgba(124, 58, 237, 0.16);
+}
+
+.list-group-item-success.match-card--left {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.16), rgba(226, 239, 255, 0.98)) !important;
+    border-color: rgba(34, 197, 94, 0.45) !important;
+    color: #14532d !important;
+}
+
+.list-group-item-success.match-card--right {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.16), rgba(237, 232, 255, 0.98)) !important;
+    border-color: rgba(34, 197, 94, 0.45) !important;
+    color: #14532d !important;
+}
+
+.list-group-item-danger.match-card--left {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.18), rgba(226, 239, 255, 0.95)) !important;
+    border-color: rgba(248, 113, 113, 0.5) !important;
+    color: #7f1d1d !important;
+}
+
+.list-group-item-danger.match-card--right {
+    background: linear-gradient(135deg, rgba(248, 113, 113, 0.18), rgba(237, 232, 255, 0.95)) !important;
+    border-color: rgba(248, 113, 113, 0.5) !important;
+    color: #7f1d1d !important;
+}
+
 .quiz-item-right {
     justify-content: flex-start;
 }
@@ -686,10 +784,18 @@ h5 {
 
 .combo-burst--yellow {
     --combo-from: #bef264;
-    --combo-mid: #facc15;
-    --combo-to: #fbbf24;
-    --combo-border: rgba(250, 204, 21, 0.5);
-    --combo-shadow: 0 16px 30px rgba(234, 179, 8, 0.32), 0 0 32px rgba(234, 179, 8, 0.34);
+    --combo-mid: #d9f99d;
+    --combo-to: #fde047;
+    --combo-border: rgba(217, 249, 157, 0.55);
+    --combo-shadow: 0 16px 30px rgba(202, 138, 4, 0.24), 0 0 28px rgba(202, 138, 4, 0.26);
+}
+
+.combo-burst--amber {
+    --combo-from: #fcd34d;
+    --combo-mid: #fbbf24;
+    --combo-to: #f59e0b;
+    --combo-border: rgba(245, 158, 11, 0.5);
+    --combo-shadow: 0 16px 32px rgba(245, 158, 11, 0.32), 0 0 32px rgba(245, 158, 11, 0.3);
 }
 
 .combo-burst--orange {
@@ -700,53 +806,10 @@ h5 {
     --combo-shadow: 0 16px 36px rgba(249, 115, 22, 0.35), 0 0 35px rgba(249, 115, 22, 0.35);
 }
 
-.combo-burst--red {
-    --combo-from: #fecdd3;
-    --combo-mid: #fb7185;
-    --combo-to: #ef4444;
-    --combo-border: rgba(239, 68, 68, 0.55);
-    --combo-shadow: 0 18px 36px rgba(248, 113, 113, 0.42), 0 0 40px rgba(248, 113, 113, 0.4);
-}
-
 .combo-burst__content {
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
-}
-
-.combo-burst--critical {
-    overflow: visible;
-}
-
-.combo-burst--critical::before {
-    content: "";
-    position: absolute;
-    inset: -12px;
-    background:
-        radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.35) 0 18%, transparent 42%),
-        radial-gradient(circle at 78% 36%, rgba(255, 255, 255, 0.25) 0 16%, transparent 38%),
-        radial-gradient(circle at 55% 72%, rgba(255, 255, 255, 0.3) 0 22%, transparent 52%);
-    filter: blur(1px);
-    opacity: 0.85;
-    animation: crit-flash 0.85s ease-out forwards;
-    pointer-events: none;
-}
-
-.combo-burst--critical::after {
-    content: "";
-    position: absolute;
-    inset: -18px;
-    background: conic-gradient(
-        from 120deg,
-        rgba(255, 255, 255, 0.65),
-        rgba(255, 244, 138, 0.7),
-        rgba(251, 113, 133, 0.8),
-        rgba(255, 255, 255, 0.65)
-    );
-    mask: radial-gradient(circle at center, transparent 32%, black 38%);
-    opacity: 0.55;
-    animation: crit-ring 0.8s ease-out forwards;
-    pointer-events: none;
 }
 
 .combo-burst__icon {
@@ -774,73 +837,6 @@ h5 {
     display: flex;
     align-items: baseline;
     gap: 0.15rem;
-}
-
-.combo-burst__crit {
-    position: absolute;
-    top: -16px;
-    right: -14px;
-    display: inline-flex;
-    align-items: center;
-    gap: 0.35rem;
-    padding: 0.45rem 0.7rem;
-    border-radius: 999px;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(255, 248, 185, 0.95));
-    color: #b91c1c;
-    box-shadow: 0 10px 22px rgba(248, 113, 113, 0.32), 0 0 25px rgba(248, 113, 113, 0.3);
-    text-transform: uppercase;
-    font-size: 0.8rem;
-    font-weight: 800;
-    letter-spacing: 0.08em;
-    animation: crit-pop 0.9s cubic-bezier(0.18, 1.3, 0.32, 1);
-}
-
-.combo-burst__crit-icon {
-    font-size: 1rem;
-    filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.6));
-}
-
-.combo-burst__crit-text {
-    color: #991b1b;
-    text-shadow: 0 0 12px rgba(248, 113, 113, 0.5);
-}
-
-@keyframes crit-pop {
-    0% {
-        opacity: 0;
-        transform: translateY(-6px) scale(0.6) rotate(-6deg);
-    }
-    55% {
-        opacity: 1;
-        transform: translateY(0) scale(1.1) rotate(1deg);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(-2px) scale(1) rotate(0deg);
-    }
-}
-
-@keyframes crit-ring {
-    0% {
-        transform: scale(0.7);
-        opacity: 0.6;
-    }
-    100% {
-        transform: scale(1.15);
-        opacity: 0;
-    }
-}
-
-@keyframes crit-flash {
-    0% {
-        opacity: 0.4;
-    }
-    40% {
-        opacity: 0.9;
-    }
-    100% {
-        opacity: 0;
-    }
 }
 
 /* ===== ТАЙМЕР ===== */

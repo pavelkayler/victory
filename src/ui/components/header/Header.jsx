@@ -12,7 +12,6 @@ const Header = () => {
   const { isAuth, userName, logout } = useContext(UserContext);
   const { isAdminAuthed } = useContext(AdminContext);
   const {
-    topic,
     timeLeft,
     isRunning,
     isQuizFinished,
