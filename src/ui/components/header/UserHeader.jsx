@@ -17,8 +17,8 @@ const UserHeader = ({
   return (
     <HeaderShell>
       <Container fluid className="p-0">
-        <Row className="gy-2 align-items-center d-none d-md-flex">
-          <Col xs="auto" className="flex-shrink-0">
+        <div className="user-header-desktop-grid d-none d-md-grid">
+          <div className="user-header-desktop-left">
             <Button
               variant="outline-primary"
               className="nav-pill-btn"
@@ -29,8 +29,8 @@ const UserHeader = ({
             >
               Выбор темы
             </Button>
-          </Col>
-          <Col className="d-flex justify-content-center">
+          </div>
+          <div className="user-header-desktop-center">
             {showUserRow && (
               <Stack
                 direction="horizontal"
@@ -51,8 +51,8 @@ const UserHeader = ({
                 </Button>
               </Stack>
             )}
-          </Col>
-          <Col xs="auto" className="flex-shrink-0">
+          </div>
+          <div className="user-header-desktop-right">
             <Button
               variant="outline-primary"
               className="nav-pill-btn"
@@ -62,8 +62,8 @@ const UserHeader = ({
             >
               {isHistoryPage ? "Пройти тест" : "История"}
             </Button>
-          </Col>
-        </Row>
+          </div>
+        </div>
 
         <Row className="gy-2 align-items-center d-flex d-md-none">
           <Col xs={12}>
