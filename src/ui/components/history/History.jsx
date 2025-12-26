@@ -97,7 +97,7 @@ const History = () => {
               <Col xs={12} md={6} className="mx-auto history-filter-wrap">
                 <FormLabel className="fw-semibold d-block mb-1">Фильтр по теме</FormLabel>
                 <FormSelect
-                  className="w-100"
+                  className="w-100 mt-2"
                   value={selectedTopicId}
                   onChange={(event) => setSelectedTopicId(event.target.value)}
                 >
@@ -111,7 +111,7 @@ const History = () => {
               </Col>
             </Row>
 
-            <Row className="mt-3">
+            <Row className="mt-3 mb-3">
               <Col xs={12} className="d-flex justify-content-center align-items-end">
                 <Button variant="outline-danger" onClick={openConfirm}>
                   Очистить историю
@@ -190,12 +190,12 @@ const History = () => {
         </Modal.Footer>
       </Modal>
 
-      <ToastContainer position="top-center" className="mt-3">
+      <ToastContainer position="bottom-center" className="mb-3">
         <Toast
           bg="success"
           onClose={() => setShowToast(false)}
           show={showToast}
-          delay={2400}
+          delay={2600}
           autohide
         >
           <Toast.Body className="text-white">{toastMessage}</Toast.Body>

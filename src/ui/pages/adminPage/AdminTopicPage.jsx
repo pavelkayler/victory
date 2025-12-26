@@ -1,7 +1,6 @@
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import {
-  Badge,
   Button,
   Card,
   CardBody,
@@ -25,7 +24,6 @@ import { useAdminGuard } from "../../../core/hooks/useAdminGuard.js";
 import { isQuestionValid } from "../../../core/utils/questions.js";
 
 const SORT_MODES = {
-  fill: "fill",
   left: "left",
   right: "right",
 };
@@ -39,7 +37,8 @@ const AdminTopicPage = () => {
 
   const topic = useMemo(() => getTopicById(topicId), [getTopicById, topicId]);
   const [highlightedId, setHighlightedId] = useState(null);
-  const [sortMode, setSortMode] = useState(SORT_MODES.fill);
+  const [sortMode, setSortMode] = useState(SORT_MODES.left);
+  const [pinnedQuestionId, setPinnedQuestionId] = useState(null);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
   const [questionDrafts, setQuestionDrafts] = useState({});
   const [isEditingTopicMeta, setIsEditingTopicMeta] = useState(false);
@@ -79,18 +78,10 @@ const AdminTopicPage = () => {
   useEffect(() => {
     if (location.state?.highlightQuestionId) {
       setHighlightedId(location.state.highlightQuestionId);
+      setPinnedQuestionId(location.state.highlightQuestionId);
       setEditingQuestionId(location.state.highlightQuestionId);
     }
   }, [location.state]);
-
-  useEffect(() => {
-    if (highlightedId === null) {
-      return undefined;
-    }
-
-    const timeoutId = setTimeout(() => setHighlightedId(null), 1600);
-    return () => clearTimeout(timeoutId);
-  }, [highlightedId]);
 
   const questions = topic?.questions ?? [];
 
@@ -122,26 +113,28 @@ const AdminTopicPage = () => {
         return compareByField(a.left, b.left);
       }
 
-      if (sortMode === SORT_MODES.right) {
-        return compareByField(a.right, b.right);
-      }
-
-      const aValid = isQuestionValid(a);
-      const bValid = isQuestionValid(b);
-
-      if (aValid === bValid) {
-        return compareByField(a.left, b.left);
-      }
-
-      return Number(aValid) - Number(bValid);
+      return compareByField(a.right, b.right);
     });
 
+    const pinnedQuestion = pinnedQuestionId
+      ? sorted.find((question) => question.id === pinnedQuestionId)
+      : null;
+    const sortedWithoutPinned = pinnedQuestion
+      ? sorted.filter((question) => question.id !== pinnedQuestionId)
+      : sorted;
+
+    const sequence = [];
+
     if (draftQuestion) {
-      return [draftQuestion, ...sorted];
+      sequence.push(draftQuestion);
     }
 
-    return sorted;
-  }, [questions, sortMode, draftQuestion]);
+    if (pinnedQuestion) {
+      sequence.push(pinnedQuestion);
+    }
+
+    return [...sequence, ...sortedWithoutPinned];
+  }, [questions, sortMode, draftQuestion, pinnedQuestionId]);
 
   const handleAddQuestion = () => {
     if (!topic) {
@@ -186,6 +179,7 @@ const AdminTopicPage = () => {
         delete next[question.id];
         return next;
       });
+      setHighlightedId((prev) => (prev === question.id ? null : prev));
       return;
     }
 
@@ -211,6 +205,8 @@ const AdminTopicPage = () => {
 
     deleteQuestion(topic.id, pendingDeleteId);
     setEditingQuestionId((prev) => (prev === pendingDeleteId ? null : prev));
+    setHighlightedId((prev) => (prev === pendingDeleteId ? null : prev));
+    setPinnedQuestionId((prev) => (prev === pendingDeleteId ? null : prev));
     setQuestionDrafts((prev) => {
       const next = { ...prev };
       delete next[pendingDeleteId];
@@ -255,7 +251,8 @@ const AdminTopicPage = () => {
         setDraftQuestion(null);
         setEditingQuestionId(null);
         setHighlightedId(created.id);
-        showToast("Сохранено");
+        setPinnedQuestionId(created.id);
+        showToast("Вопрос сохранён");
       }
       return;
     }
@@ -270,7 +267,9 @@ const AdminTopicPage = () => {
       { allowDraft: false },
     );
     setEditingQuestionId(null);
-    showToast("Сохранено");
+    setHighlightedId(questionId);
+    setPinnedQuestionId(questionId);
+    showToast("Вопрос сохранён");
   };
 
   const handleStartEditTopicMeta = () => {
@@ -299,6 +298,12 @@ const AdminTopicPage = () => {
     setTopicTitleDraft(topic?.title ?? "");
     setTopicDescriptionDraft(topic?.description ?? "");
     setIsEditingTopicMeta(false);
+  };
+
+  const handleSortChange = (event) => {
+    setSortMode(event.target.value);
+    setPinnedQuestionId(null);
+    setHighlightedId(null);
   };
 
   if (!isAllowed) {
@@ -342,9 +347,8 @@ const AdminTopicPage = () => {
               <FormSelect
                 size="sm"
                 value={sortMode}
-                onChange={(event) => setSortMode(event.target.value)}
+                onChange={handleSortChange}
               >
-                <option value={SORT_MODES.fill}>Сначала незаполненные</option>
                 <option value={SORT_MODES.left}>A→Z по левой колонке</option>
                 <option value={SORT_MODES.right}>A→Z по правой колонке</option>
               </FormSelect>
@@ -353,89 +357,91 @@ const AdminTopicPage = () => {
 
           <Card className="shadow-sm page-card">
             <CardBody>
-              <div className="d-flex align-items-start gap-3 mb-3 flex-wrap">
-                <div className="flex-grow-1">
-                  <div className="d-flex align-items-start gap-3 flex-wrap">
-                    {isEditingTopicMeta ? (
-                      <div className="w-100">
-                        <FormGroup controlId="topicTitleEdit" className="mb-3">
-                          <FormLabel>Название темы</FormLabel>
-                          <FormControl
-                            type="text"
-                            value={topicTitleDraft}
-                            onChange={(event) => setTopicTitleDraft(event.target.value)}
-                            placeholder="Название темы"
-                          />
-                        </FormGroup>
-                        <FormGroup controlId="topicDescriptionEdit" className="mb-3">
-                          <FormLabel>Описание темы</FormLabel>
-                          <FormControl
-                            as="textarea"
-                            rows={3}
-                            value={topicDescriptionDraft}
-                            onChange={(event) => setTopicDescriptionDraft(event.target.value)}
-                            placeholder="Описание темы"
-                          />
-                        </FormGroup>
-                        <div className="d-flex flex-wrap gap-2">
-                          <Button
-                            variant="success"
-                            type="button"
-                            onClick={handleSaveTopicMeta}
-                            disabled={!topicTitleDraft.trim()}
-                          >
-                            Сохранить
-                          </Button>
-                          <Button
-                            variant="outline-secondary"
-                            type="button"
-                            onClick={handleCancelTopicMeta}
-                          >
-                            Отмена
-                          </Button>
-                        </div>
-                      </div>
-                    ) : (
-                      <>
-                        <CardTitle className="fs-3 mb-0">{topic.title}</CardTitle>
-                        <Badge bg="light" text="dark" className="align-self-center">
-                          <i className="bi bi-list-check me-1" aria-hidden="true" />
-                          {questions.length} вопросов
-                        </Badge>
-                        <Button
-                          variant="outline-primary"
-                          size="sm"
-                          type="button"
-                          onClick={handleStartEditTopicMeta}
-                          className="align-self-center"
-                        >
-                          Редактировать тему
-                        </Button>
-                      </>
-                    )}
-                  </div>
-                  {!isEditingTopicMeta && (
-                    <CardSubtitle className="text-muted mb-2 admin-topic-subtitle">
+              <Row className="gy-2 align-items-start justify-content-between admin-topic-row-1">
+                <Col xs={12} md className="admin-topic-title-col">
+                  {isEditingTopicMeta ? (
+                    <FormGroup controlId="topicTitleEdit" className="mb-2">
+                      <FormLabel className="fw-semibold">Название темы</FormLabel>
+                      <FormControl
+                        as="textarea"
+                        rows={2}
+                        value={topicTitleDraft}
+                        onChange={(event) => setTopicTitleDraft(event.target.value)}
+                        placeholder="Название темы"
+                      />
+                    </FormGroup>
+                  ) : (
+                    <CardTitle as="h2" className="fs-3 mb-0">{topic.title}</CardTitle>
+                  )}
+                </Col>
+                <Col xs="auto" className="admin-topic-badge-col">
+                  <Badge bg="light" text="dark" className="fw-semibold admin-topic-count">
+                    {questions.length} вопросов
+                  </Badge>
+                </Col>
+              </Row>
+
+              <Row className="mt-2 admin-topic-row-2">
+                <Col>
+                  {isEditingTopicMeta ? (
+                    <FormGroup controlId="topicDescriptionEdit" className="mb-0">
+                      <FormLabel className="fw-semibold">Описание темы</FormLabel>
+                      <FormControl
+                        as="textarea"
+                        rows={3}
+                        value={topicDescriptionDraft}
+                        onChange={(event) => setTopicDescriptionDraft(event.target.value)}
+                        placeholder="Описание темы"
+                      />
+                    </FormGroup>
+                  ) : (
+                    <CardSubtitle className="text-muted admin-topic-subtitle">
                       {topic.description}
                     </CardSubtitle>
                   )}
-                </div>
-                <Button
-                  variant="success"
-                  onClick={handleAddQuestion}
-                  className="d-none d-md-inline-flex"
-                >
-                  <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-                  Добавить вопрос
-                </Button>
-              </div>
+                </Col>
+              </Row>
 
-              <div className="d-flex d-md-none justify-content-start mt-2 mb-3">
-                <Button variant="success" onClick={handleAddQuestion}>
-                  <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-                  Добавить вопрос
-                </Button>
-              </div>
+              <Row className="mt-3 justify-content-center admin-topic-row-3">
+                <Col xs="auto">
+                  {isEditingTopicMeta ? (
+                    <div className="d-flex flex-wrap gap-2 justify-content-center">
+                      <Button
+                        variant="success"
+                        type="button"
+                        onClick={handleSaveTopicMeta}
+                        disabled={!topicTitleDraft.trim()}
+                      >
+                        Сохранить
+                      </Button>
+                      <Button
+                        variant="outline-secondary"
+                        type="button"
+                        onClick={handleCancelTopicMeta}
+                      >
+                        Отмена
+                      </Button>
+                    </div>
+                  ) : (
+                    <Button
+                      variant="outline-primary"
+                      type="button"
+                      onClick={handleStartEditTopicMeta}
+                    >
+                      Редактировать тему
+                    </Button>
+                  )}
+                </Col>
+              </Row>
+
+              <Row className="mt-3 justify-content-center admin-topic-row-4">
+                <Col xs="auto">
+                  <Button variant="success" onClick={handleAddQuestion}>
+                    <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+                    Добавить вопрос
+                  </Button>
+                </Col>
+              </Row>
 
               <Stack gap={3} className="admin-questions-list">
                 {questions.length === 0 && !draftQuestion && (
@@ -587,12 +593,12 @@ const AdminTopicPage = () => {
         </Modal.Footer>
       </Modal>
 
-      <ToastContainer position="top-center" className="mt-3">
+      <ToastContainer position="bottom-center" className="mb-3">
         <Toast
           bg={toastState.bg}
           onClose={() => setToastState((prev) => ({ ...prev, show: false }))}
           show={toastState.show}
-          delay={2400}
+          delay={2600}
           autohide
         >
           <Toast.Body className="text-white">{toastState.message}</Toast.Body>
