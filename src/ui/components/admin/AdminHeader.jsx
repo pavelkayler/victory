@@ -24,7 +24,7 @@ const AdminHeader = ({ onLogout }) => {
       </div>
 
       <CardSubtitle className="text-muted mb-3">
-        Доступ по адресу /qques. Сессия хранится до перехода на пользовательские страницы.
+        Управляйте темами и вопросами викторины.
       </CardSubtitle>
     </div>
   );

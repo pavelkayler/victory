@@ -121,7 +121,7 @@ const TopicsProvider = ({ children }) => {
 
         return {
           ...topic,
-          questions: [...topic.questions, createdQuestion],
+          questions: [createdQuestion, ...topic.questions],
         };
       }),
     );

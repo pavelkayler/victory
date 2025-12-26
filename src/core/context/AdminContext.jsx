@@ -1,4 +1,4 @@
-import { createContext, useMemo, useState } from "react";
+import { createContext, useCallback, useMemo, useState } from "react";
 
 const ADMIN_PASSWORD = "pass";
 const ADMIN_AUTH_KEY = "quiz-admin-auth";
@@ -21,7 +21,7 @@ const readInitialAuth = () => {
 const AdminProvider = ({ children }) => {
   const [isAdminAuthed, setIsAdminAuthed] = useState(() => readInitialAuth());
 
-  const authorize = (password) => {
+  const authorize = useCallback((password) => {
     const isValid = password.trim() === ADMIN_PASSWORD;
 
     setIsAdminAuthed(isValid);
@@ -35,18 +35,18 @@ const AdminProvider = ({ children }) => {
     }
 
     return isValid;
-  };
+  }, []);
 
-  const logoutAdmin = () => {
+  const logoutAdmin = useCallback(() => {
     setIsAdminAuthed(false);
     try {
       sessionStorage.removeItem(ADMIN_AUTH_KEY);
     } catch (error) {
       console.error("Failed to clear admin auth", error);
     }
-  };
+  }, []);
 
-  const resetAdmin = () => logoutAdmin();
+  const resetAdmin = useCallback(() => logoutAdmin(), [logoutAdmin]);
 
   const value = useMemo(
     () => ({
@@ -55,7 +55,7 @@ const AdminProvider = ({ children }) => {
       logoutAdmin,
       resetAdmin,
     }),
-    [isAdminAuthed],
+    [authorize, isAdminAuthed, logoutAdmin, resetAdmin],
   );
 
   return <AdminContext.Provider value={value}>{children}</AdminContext.Provider>;

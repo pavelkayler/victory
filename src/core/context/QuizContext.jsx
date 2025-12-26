@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import {
   createContext,
   useContext,
@@ -358,7 +359,6 @@ const QuizProvider = ({ children }) => {
   // авто-завершение по таймеру
   useEffect(() => {
     if (timeLeft === 0 && isRunning && !isQuizFinished) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsQuizFinished(true);
       setIsRunning(false);
       setCompletedSessionId(sessionId);
@@ -371,7 +371,6 @@ const QuizProvider = ({ children }) => {
       return;
     }
 
-    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsRunRecorded(true);
 
     const durationSec = QUIZ_DURATION_SECONDS - timeLeft;

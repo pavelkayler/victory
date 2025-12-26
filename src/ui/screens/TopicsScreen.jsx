@@ -1,7 +1,6 @@
 import { useContext } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import {
-  Alert,
   Badge,
   Button,
   Card,
@@ -15,6 +14,7 @@ import { QuizContext, TopicsContext } from "../../core/context/Context.jsx";
 import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
 import { MIN_PAIRS } from "../../core/constants/quiz.js";
 import { isQuestionValid } from "../../core/utils/questions.js";
+import { pluralRu } from "../../core/utils/pluralRu.js";
 
 const TopicsScreen = () => {
   const { initQuiz } = useContext(QuizContext);
@@ -45,14 +45,17 @@ const TopicsScreen = () => {
             </CardTitle>
 
             {topics.length === 0 ? (
-              <Alert variant="info" className="mb-0">
-                Пока нет тем. Добавьте их в админ-кабинете.
-              </Alert>
+              <Card className="border-0 bg-light-subtle mb-0">
+                <CardBody>
+                  <div className="text-muted">Пока нет тем. Добавьте их в админ-кабинете.</div>
+                </CardBody>
+              </Card>
             ) : (
               topics.map((topic) => {
                 const validCount = topic.questions.filter(isQuestionValid).length;
                 const totalCount = topic.questions.length;
                 const canStart = validCount >= MIN_PAIRS;
+                const badgeText = `${totalCount} ${pluralRu(totalCount, ["вопрос", "вопроса", "вопросов"])}`;
 
                 return (
                   <Card key={topic.id} className="mb-3 border-primary">
@@ -64,20 +67,29 @@ const TopicsScreen = () => {
                       <CardText className="mb-3 text-muted">
                         {topic.description}
                       </CardText>
-                      <div className="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                        <Badge bg="light" text="dark">
-                          <i className="bi bi-list-check me-1" aria-hidden="true" />
-                          {totalCount} вопросов
+                      <div className="d-flex align-items-center gap-2 mb-3 flex-wrap">
+                        <Badge bg="light" text="dark" className="fw-semibold">
+                          {badgeText}
                         </Badge>
                       </div>
-                      <Button
-                        variant="primary"
-                        type="button"
-                        onClick={handleSelect(topic)}
-                        disabled={!canStart}
-                      >
-                        Пройти тест
-                      </Button>
+                      <div className="d-flex flex-wrap gap-2">
+                        <Button
+                          variant="primary"
+                          type="button"
+                          onClick={handleSelect(topic)}
+                          disabled={!canStart}
+                        >
+                          Пройти тест
+                        </Button>
+                        <Button
+                          variant="outline-secondary"
+                          as={Link}
+                          to={`/rating/${topic.id}`}
+                          type="button"
+                        >
+                          Рейтинг
+                        </Button>
+                      </div>
                       {!canStart && (
                         <CardText className="text-danger small mt-2 mb-0">
                           Нужно минимум {MIN_PAIRS} заполненных вопросов для старта.

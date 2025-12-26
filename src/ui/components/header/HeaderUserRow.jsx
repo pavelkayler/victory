@@ -6,7 +6,7 @@ const HeaderUserRow = ({ displayName, onLogout }) => {
   }
 
   return (
-    <div className="user-header-mobile-row d-flex d-md-none">
+    <div className="user-header-mobile-row d-flex d-md-none pt-2">
       <div className="d-inline-flex align-items-center gap-2 flex-grow-1 min-w-0">
         <i className="bi bi-person-circle text-primary" aria-hidden="true" />
         <span className="fw-semibold user-name" title={displayName}>

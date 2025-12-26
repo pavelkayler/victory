@@ -1,8 +1,9 @@
 import { useContext, useEffect, useMemo } from "react";
 import { useLocation } from "react-router-dom";
-import { Button, Stack } from "react-bootstrap";
+import { Button } from "react-bootstrap";
 
 import { AdminContext, QuizContext, UserContext } from "../../../core/context/Context.jsx";
+import { ADMIN_PATH } from "../../../core/constants/paths.js";
 import { HeaderShell } from "./HeaderShell.jsx";
 import { HeaderNavRow } from "./HeaderNavRow.jsx";
 import { HeaderUserRow } from "./HeaderUserRow.jsx";
@@ -27,7 +28,7 @@ const Header = () => {
   const isQuizPage = location.pathname === "/quiz";
   const isTopicsPage = location.pathname === "/topics";
   const isHistoryPage = location.pathname === "/history";
-  const isAdminPage = location.pathname.startsWith("/qques");
+  const isAdminPage = location.pathname.startsWith(ADMIN_PATH);
 
   const timerText = useMemo(() => {
     const safeSeconds = Math.max(0, timeLeft ?? 0);
@@ -53,10 +54,14 @@ const Header = () => {
       return;
     }
 
-    if (!location.pathname.startsWith("/qques")) {
+    if (!location.pathname.startsWith(ADMIN_PATH)) {
       logoutAdmin();
     }
   }, [isAdminAuthed, location.pathname, logoutAdmin]);
+
+  if (isAdminPage) {
+    return null;
+  }
 
   if (!isAuth) {
     return null;
@@ -114,30 +119,10 @@ const Header = () => {
           brandLabel={isTopicsPage || isHistoryPage ? "Выбор темы" : topic?.title || "Тема"}
           isHistoryPage={isHistoryPage}
           onBrandClick={handleTopicClick}
+          showUserHeaderBar={showUserHeaderBar}
+          displayName={displayName}
+          onLogout={handleLogout}
         />
-
-        {showUserHeaderBar && (
-          <Stack
-            direction="horizontal"
-            gap={2}
-            className="align-items-center d-none d-md-inline-flex user-header-desktop"
-          >
-            <div className="d-inline-flex align-items-center gap-2 flex-nowrap">
-              <i className="bi bi-person-circle text-primary" aria-hidden="true" />
-              <span className="fw-semibold user-name" title={displayName}>
-                {displayName}
-              </span>
-            </div>
-            <Button
-              variant="outline-danger"
-              type="button"
-              className="user-logout-btn"
-              onClick={handleLogout}
-            >
-              Выйти
-            </Button>
-          </Stack>
-        )}
 
         <HeaderUserRow displayName={displayName} onLogout={handleLogout} />
       </div>
