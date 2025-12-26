@@ -1,15 +1,15 @@
 import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Container, Row, Col, Card, CardBody } from "react-bootstrap";
+import { Card, CardBody, Col, Container, Row } from "react-bootstrap";
 
-import { QuizContext } from "../../../core/context/Context.jsx";
-import { useAuthGuard } from "../../../core/hooks/useAuthGuard.js";
-import { QuizHeader } from "./header/QuizHeader.jsx";
-import { QuizColumns } from "./questions/QuizColumns.jsx";
-import { ScoreBurst } from "./effects/ScoreBurst.jsx";
-import { ComboBurst } from "./effects/ComboBurst.jsx";
+import { QuizContext } from "../../core/context/Context.jsx";
+import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
+import { QuizHeader } from "../components/quiz/header/QuizHeader.jsx";
+import { QuizColumns } from "../components/quiz/questions/QuizColumns.jsx";
+import { ScoreBurst } from "../components/quiz/effects/ScoreBurst.jsx";
+import { ComboBurst } from "../components/quiz/effects/ComboBurst.jsx";
 
-const Quiz = () => {
+const QuizScreen = () => {
   const {
     score,
     streak,
@@ -26,15 +26,12 @@ const Quiz = () => {
   useAuthGuard();
   const navigate = useNavigate();
 
-  // при завершении квиза — на результат
   useEffect(() => {
     if (isQuizFinished && completedSessionId === sessionId) {
       navigate("/result");
     }
   }, [completedSessionId, isQuizFinished, navigate, sessionId]);
 
-  // храним актуальные значения флагов в ref,
-  // чтобы корректно завершать тест только при размонтировании компонента
   const wasStartedRef = useRef(wasStarted);
   const isRunningRef = useRef(isRunning);
   const isQuizFinishedRef = useRef(isQuizFinished);
@@ -51,7 +48,6 @@ const Quiz = () => {
     isQuizFinishedRef.current = isQuizFinished;
   }, [isQuizFinished]);
 
-  // авто-завершение при уходе со страницы квиза (unmount)
   useEffect(() => {
     return () => {
       if (
@@ -64,12 +60,10 @@ const Quiz = () => {
     };
   }, [finishQuiz]);
 
-  // локальное состояние для "Начать" + отсчёт
   const handleStart = () => {
     startCountdown();
   };
 
-  // анимация "+1" по изменению score
   const [showBurst, setShowBurst] = useState(false);
   const prevScoreRef = useRef(score);
   const [showCombo, setShowCombo] = useState(false);
@@ -77,7 +71,6 @@ const Quiz = () => {
 
   useEffect(() => {
     if (score > prevScoreRef.current) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowBurst(true);
       const timeoutId = setTimeout(() => {
         setShowBurst(false);
@@ -90,12 +83,10 @@ const Quiz = () => {
     return undefined;
   }, [score]);
 
-  // вспышка комбо только на рост серии, а не постоянно
   useEffect(() => {
     const prevStreak = prevStreakRef.current;
 
     if (streak >= 3 && streak > prevStreak) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setShowCombo(true);
       const timeoutId = setTimeout(() => setShowCombo(false), 600);
       prevStreakRef.current = streak;
@@ -140,4 +131,4 @@ const Quiz = () => {
   );
 };
 
-export { Quiz };
+export { QuizScreen };

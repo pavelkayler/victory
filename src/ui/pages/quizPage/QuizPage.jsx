@@ -1,10 +1,10 @@
-import { Quiz } from "../../components/quiz/Quiz.jsx";
 import { AppLayout } from "../../layouts/AppLayout.jsx";
+import { QuizScreen } from "../../screens/QuizScreen.jsx";
 
 const QuizPage = () => {
   return (
     <AppLayout>
-      <Quiz />
+      <QuizScreen />
     </AppLayout>
   );
 };

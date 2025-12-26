@@ -1,10 +1,10 @@
-import { Topics } from "../../components/topics/Topics.jsx";
 import { AppLayout } from "../../layouts/AppLayout.jsx";
+import { TopicsScreen } from "../../screens/TopicsScreen.jsx";
 
 const TopicsPage = () => {
   return (
     <AppLayout>
-      <Topics />
+      <TopicsScreen />
     </AppLayout>
   );
 };

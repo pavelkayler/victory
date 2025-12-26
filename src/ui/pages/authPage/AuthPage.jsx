@@ -1,10 +1,11 @@
-import { Auth } from "../../components/auth/Auth.jsx";
+import { AuthScreen } from "../../screens/AuthScreen.jsx";
+import { AppLayout } from "../../layouts/AppLayout.jsx";
 
 const AuthPage = () => {
   return (
-    <div className="app-shell">
-      <Auth />
-    </div>
+    <AppLayout>
+      <AuthScreen />
+    </AppLayout>
   );
 };
 
