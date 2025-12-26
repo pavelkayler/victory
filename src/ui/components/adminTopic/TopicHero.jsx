@@ -1,6 +1,10 @@
 import { Badge, CardSubtitle, CardTitle, Col, Row } from "react-bootstrap";
 
+import { pluralRu } from "../../../core/utils/pluralRu.js";
+
 const TopicHero = ({ topic, questionsCount }) => {
+  const badgeText = `${questionsCount} ${pluralRu(questionsCount, ["вопрос", "вопроса", "вопросов"])}`;
+
   return (
     <>
       <Row className="gy-2 align-items-start justify-content-between admin-topic-row-1">
@@ -9,7 +13,7 @@ const TopicHero = ({ topic, questionsCount }) => {
         </Col>
         <Col xs="auto" className="admin-topic-badge-col">
           <Badge bg="light" text="dark" className="fw-semibold admin-topic-count">
-            {questionsCount} вопросов
+            {badgeText}
           </Badge>
         </Col>
       </Row>

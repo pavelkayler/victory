@@ -1,15 +1,11 @@
-import { Button, FormControl, FormGroup, FormLabel, Row } from "react-bootstrap";
+import { FormControl, FormGroup, FormLabel, Row } from "react-bootstrap";
 
 const TopicEditForm = ({
   titleDraft,
   descriptionDraft,
   onChangeTitle,
   onChangeDescription,
-  onSave,
-  onCancel,
 }) => {
-  const isTitleEmpty = !titleDraft.trim();
-
   return (
     <Row className="mt-2">
       <FormGroup controlId="topicTitleEdit" className="mb-2">
@@ -32,24 +28,6 @@ const TopicEditForm = ({
           placeholder="Описание темы"
         />
       </FormGroup>
-
-      <div className="d-flex flex-wrap gap-2 justify-content-end">
-        <Button
-          variant="success"
-          type="button"
-          onClick={onSave}
-          disabled={isTitleEmpty}
-        >
-          Сохранить
-        </Button>
-        <Button
-          variant="outline-secondary"
-          type="button"
-          onClick={onCancel}
-        >
-          Отмена
-        </Button>
-      </div>
     </Row>
   );
 };

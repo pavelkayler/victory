@@ -1,6 +1,8 @@
-import { Container, Stack, Button } from "react-bootstrap";
+import { Container } from "react-bootstrap";
+import { Link } from "react-router-dom";
 
 import { APP_VERSION } from "../../../core/version.js";
+import { ADMIN_PATH } from "../../../core/constants/paths.js";
 
 const Footer = () => {
   const currentYear = new Date().getFullYear();
@@ -8,42 +10,37 @@ const Footer = () => {
   return (
     <footer className="app-footer mt-auto">
       <Container fluid className="py-3">
-        <div className="d-none d-md-flex justify-content-between align-items-center gap-3">
-          <Stack direction="horizontal" gap={2} className="flex-wrap">
-            <span className="fw-semibold d-inline-flex align-items-center gap-1">
-              <i className="bi bi-c-circle" aria-hidden="true" />
-              pavelkayler
-            </span>
-            <Button
-              as="a"
+        <div className="footer-desktop d-none d-md-flex justify-content-center align-items-center gap-2 flex-wrap">
+          <span className="fw-semibold d-inline-flex align-items-center gap-1">
+            <i className="bi bi-c-circle" aria-hidden="true" />
+            <a
               href="https://github.com/pavelkayler"
               target="_blank"
               rel="noreferrer"
-              variant="link"
-              className="p-0 fw-semibold footer-link-btn"
+              className="footer-link"
             >
-              GitHub
-            </Button>
-          </Stack>
-
-          <Stack direction="horizontal" gap={2} className="flex-wrap text-muted">
-            <span className="fw-semibold">v{APP_VERSION}</span>
-            <span className="fw-semibold">{currentYear}</span>
-          </Stack>
+              pavelkayler
+            </a>
+          </span>
+          <span className="text-muted">·</span>
+          <span className="fw-semibold">{currentYear}</span>
+          <span className="text-muted">·</span>
+          <span className="fw-semibold">
+            <Link to={ADMIN_PATH} className="footer-link version-link">v</Link>
+            {APP_VERSION}
+          </span>
         </div>
 
-        <div className="d-flex d-md-none justify-content-center align-items-center">
-          <Button
-            as="a"
+        <div className="footer-mobile d-flex d-md-none justify-content-center align-items-center gap-2">
+          <i className="bi bi-c-circle" aria-hidden="true" />
+          <a
             href="https://github.com/pavelkayler"
             target="_blank"
             rel="noreferrer"
-            variant="link"
-            className="p-0 fw-semibold footer-link-btn d-inline-flex align-items-center gap-1"
+            className="footer-link"
           >
-            <i className="bi bi-c-circle" aria-hidden="true" />
             pavelkayler
-          </Button>
+          </a>
         </div>
       </Container>
     </footer>

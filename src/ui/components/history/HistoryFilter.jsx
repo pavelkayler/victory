@@ -3,7 +3,7 @@ import { Col, FormLabel, FormSelect, Row } from "react-bootstrap";
 const HistoryFilter = ({ selectedTopicId, topics, onChange }) => {
   return (
     <Row className="gy-2 gx-3 align-items-center">
-      <Col xs={12} md={6} className="mx-auto history-filter-wrap">
+      <Col xs={12} className="history-filter-wrap">
         <FormLabel className="fw-semibold d-block mb-1">Фильтр по теме</FormLabel>
         <FormSelect
           className="w-100 mt-2"

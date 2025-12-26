@@ -14,6 +14,7 @@ import {
 } from "react-bootstrap";
 
 import { AdminContext, TopicsContext } from "../../core/context/Context.jsx";
+import { ADMIN_PATH } from "../../core/constants/paths.js";
 import { AppToast } from "../components/common/AppToast.jsx";
 import { AdminHeader } from "../components/admin/AdminHeader.jsx";
 import { TopicListHeader } from "../components/admin/TopicListHeader.jsx";
@@ -74,12 +75,12 @@ const AdminScreen = () => {
   };
 
   const handleEditClick = (topicId) => {
-    navigate(`/qques/topics/${topicId}`);
+    navigate(`${ADMIN_PATH}/topics/${topicId}`);
   };
 
   const handleLogoutAdmin = () => {
-    logoutAdmin();
     navigate("/", { replace: true });
+    logoutAdmin();
   };
 
   const showToast = (message, bg = "success") => {
@@ -96,7 +97,7 @@ const AdminScreen = () => {
               <CardTitle className="fs-3 mb-0">Админ-кабинет</CardTitle>
             </div>
             <CardSubtitle className="text-muted mb-4">
-              Доступ по адресу /qques. Сессия хранится до перехода на пользовательские страницы.
+              Введите пароль администратора, чтобы управлять темами.
             </CardSubtitle>
 
             <Form onSubmit={handlePasswordSubmit} className="admin-auth-form">

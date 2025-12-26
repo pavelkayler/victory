@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
 import {
@@ -8,14 +9,12 @@ import {
   CardTitle,
   Col,
   Container,
-  FormControl,
-  FormGroup,
-  FormLabel,
   FormSelect,
   Row,
 } from "react-bootstrap";
 
 import { TopicsContext } from "../../core/context/Context.jsx";
+import { ADMIN_PATH } from "../../core/constants/paths.js";
 import { useAdminGuard } from "../../core/hooks/useAdminGuard.js";
 import { isQuestionValid } from "../../core/utils/questions.js";
 import { ConfirmModal } from "../components/common/ConfirmModal.jsx";
@@ -26,8 +25,11 @@ import { TopicEditForm } from "../components/adminTopic/TopicEditForm.jsx";
 import { QuestionsList } from "../components/adminTopic/QuestionsList.jsx";
 
 const SORT_MODES = {
-  left: "left",
-  right: "right",
+  leftAsc: "leftAsc",
+  leftDesc: "leftDesc",
+  rightAsc: "rightAsc",
+  rightDesc: "rightDesc",
+  created: "created",
 };
 
 const AdminTopicScreen = () => {
@@ -39,7 +41,8 @@ const AdminTopicScreen = () => {
 
   const topic = useMemo(() => getTopicById(topicId), [getTopicById, topicId]);
   const [highlightedId, setHighlightedId] = useState(null);
-  const [sortMode, setSortMode] = useState(SORT_MODES.left);
+  const [lastCreatedId, setLastCreatedId] = useState(null);
+  const [sortMode, setSortMode] = useState(SORT_MODES.created);
   const [pinnedQuestionId, setPinnedQuestionId] = useState(null);
   const [editingQuestionId, setEditingQuestionId] = useState(null);
   const [questionDrafts, setQuestionDrafts] = useState({});
@@ -82,41 +85,44 @@ const AdminTopicScreen = () => {
       setHighlightedId(location.state.highlightQuestionId);
       setPinnedQuestionId(location.state.highlightQuestionId);
       setEditingQuestionId(location.state.highlightQuestionId);
+      setLastCreatedId(location.state.highlightQuestionId);
     }
   }, [location.state]);
 
-  const questions = topic?.questions ?? [];
+  const questions = useMemo(() => topic?.questions ?? [], [topic]);
 
   const showToast = (message, bg = "success") => {
     setToastState({ show: true, message, bg });
   };
 
-  const compareByField = (aValue, bValue) => {
-    const leftText = (aValue ?? "").trim();
-    const rightText = (bValue ?? "").trim();
-    const isLeftEmpty = leftText === "";
-    const isRightEmpty = rightText === "";
-
-    if (isLeftEmpty && !isRightEmpty) {
-      return 1;
-    }
-    if (!isLeftEmpty && isRightEmpty) {
-      return -1;
-    }
-
-    return leftText.localeCompare(rightText, "ru", { sensitivity: "base" });
-  };
-
   const displayedQuestions = useMemo(() => {
     const sorted = [...questions];
 
-    sorted.sort((a, b) => {
-      if (sortMode === SORT_MODES.left) {
-        return compareByField(a.left, b.left);
+    const compareByField = (aValue, bValue, direction = 1) => {
+      const leftText = (aValue ?? "").trim();
+      const rightText = (bValue ?? "").trim();
+      const isLeftEmpty = leftText === "";
+      const isRightEmpty = rightText === "";
+
+      if (isLeftEmpty && !isRightEmpty) {
+        return 1;
+      }
+      if (!isLeftEmpty && isRightEmpty) {
+        return -1;
       }
 
-      return compareByField(a.right, b.right);
-    });
+      return leftText.localeCompare(rightText, "ru", { sensitivity: "base" }) * direction;
+    };
+
+    if (sortMode === SORT_MODES.leftAsc) {
+      sorted.sort((a, b) => compareByField(a.left, b.left, 1));
+    } else if (sortMode === SORT_MODES.leftDesc) {
+      sorted.sort((a, b) => compareByField(a.left, b.left, -1));
+    } else if (sortMode === SORT_MODES.rightAsc) {
+      sorted.sort((a, b) => compareByField(a.right, b.right, 1));
+    } else if (sortMode === SORT_MODES.rightDesc) {
+      sorted.sort((a, b) => compareByField(a.right, b.right, -1));
+    }
 
     const pinnedQuestion = pinnedQuestionId
       ? sorted.find((question) => question.id === pinnedQuestionId)
@@ -208,13 +214,14 @@ const AdminTopicScreen = () => {
     setEditingQuestionId((prev) => (prev === pendingDeleteId ? null : prev));
     setHighlightedId((prev) => (prev === pendingDeleteId ? null : prev));
     setPinnedQuestionId((prev) => (prev === pendingDeleteId ? null : prev));
+    setLastCreatedId((prev) => (prev === pendingDeleteId ? null : prev));
     setQuestionDrafts((prev) => {
       const next = { ...prev };
       delete next[pendingDeleteId];
       return next;
     });
     setPendingDeleteId(null);
-    showToast("Вопрос удалён");
+    showToast("Сохранено");
   };
 
   const handleSaveQuestion = (questionId) => {
@@ -253,7 +260,8 @@ const AdminTopicScreen = () => {
         setEditingQuestionId(null);
         setHighlightedId(created.id);
         setPinnedQuestionId(created.id);
-        showToast("Вопрос сохранён");
+        setLastCreatedId(created.id);
+        showToast("Сохранено");
       }
       return;
     }
@@ -268,9 +276,9 @@ const AdminTopicScreen = () => {
       { allowDraft: false },
     );
     setEditingQuestionId(null);
-    setHighlightedId(questionId);
-    setPinnedQuestionId(questionId);
-    showToast("Вопрос сохранён");
+    setHighlightedId((prev) => (questionId === lastCreatedId ? prev : null));
+    setPinnedQuestionId((prev) => (questionId === lastCreatedId ? prev : null));
+    showToast("Сохранено");
   };
 
   const handleStartEditTopicMeta = () => {
@@ -292,7 +300,7 @@ const AdminTopicScreen = () => {
       description: topicDescriptionDraft,
     });
     setIsEditingTopicMeta(false);
-    showToast("Тема сохранена");
+    showToast("Сохранено");
   };
 
   const handleCancelTopicMeta = () => {
@@ -305,6 +313,7 @@ const AdminTopicScreen = () => {
     setSortMode(event.target.value);
     setPinnedQuestionId(null);
     setHighlightedId(null);
+    setLastCreatedId(null);
   };
 
   if (!isAllowed) {
@@ -321,7 +330,7 @@ const AdminTopicScreen = () => {
               <CardSubtitle className="text-muted mb-4">
                 Проверьте ссылку или вернитесь на список тем.
               </CardSubtitle>
-              <Button as={Link} to="/qques" variant="primary">
+              <Button as={Link} to={ADMIN_PATH} variant="primary">
                 Назад к темам
               </Button>
             </CardBody>
@@ -336,7 +345,7 @@ const AdminTopicScreen = () => {
       <div className="page-wrap">
         <Row className="mb-3 align-items-center">
           <Col>
-            <Button as={Link} to="/qques" variant="outline-primary" size="sm" className="admin-back-btn">
+            <Button as={Link} to={ADMIN_PATH} variant="outline-primary" size="sm" className="admin-back-btn">
               <i className="bi bi-arrow-left-short me-2" aria-hidden="true" />
               К списку тем
             </Button>
@@ -347,8 +356,11 @@ const AdminTopicScreen = () => {
               value={sortMode}
               onChange={handleSortChange}
             >
-              <option value={SORT_MODES.left}>A→Z по левой колонке</option>
-              <option value={SORT_MODES.right}>A→Z по правой колонке</option>
+              <option value={SORT_MODES.created}>По порядку создания</option>
+              <option value={SORT_MODES.leftAsc}>А→Я по левой колонке</option>
+              <option value={SORT_MODES.leftDesc}>Я→А по левой колонке</option>
+              <option value={SORT_MODES.rightAsc}>А→Я по правой колонке</option>
+              <option value={SORT_MODES.rightDesc}>Я→А по правой колонке</option>
             </FormSelect>
           </Col>
         </Row>
@@ -361,8 +373,6 @@ const AdminTopicScreen = () => {
                 descriptionDraft={topicDescriptionDraft}
                 onChangeTitle={setTopicTitleDraft}
                 onChangeDescription={setTopicDescriptionDraft}
-                onSave={handleSaveTopicMeta}
-                onCancel={handleCancelTopicMeta}
               />
             ) : (
               <TopicHero topic={topic} questionsCount={questions.length} />
@@ -373,6 +383,8 @@ const AdminTopicScreen = () => {
               onEditTopic={handleStartEditTopicMeta}
               onAddQuestion={handleAddQuestion}
               onCancelEdit={handleCancelTopicMeta}
+              onSaveTopic={handleSaveTopicMeta}
+              isSaveDisabled={!topicTitleDraft.trim()}
             />
 
             <QuestionsList

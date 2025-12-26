@@ -154,6 +154,7 @@ body {
 
 .header-grid__center {
     justify-self: center;
+    min-width: 0;
 }
 
 .header-grid__actions {
@@ -168,14 +169,14 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
+    max-width: 100%;
 }
 
 .user-header-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     align-items: center;
-    justify-content: space-between;
-    gap: 0.75rem;
-    flex-wrap: nowrap;
+    gap: clamp(0.5rem, 2vw, 1rem);
     width: 100%;
 }
 
@@ -185,6 +186,7 @@ body {
     align-items: center;
     gap: 0.5rem;
     margin-top: 0.35rem;
+    padding-top: 0.5rem;
 }
 
 .user-name {
@@ -192,6 +194,10 @@ body {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+}
+.user-name--desktop {
+    max-width: 170px;
+    min-width: 0;
 }
 
 .user-logout-btn {
@@ -894,6 +900,8 @@ h5 {
     border: 1px solid #fbbf24;
     font-variant-numeric: tabular-nums;
     min-width: 120px;
+    width: clamp(120px, 18vw, 160px);
+    max-width: 160px;
     justify-content: center;
     color: #92400e;
     font-weight: 800;
@@ -902,30 +910,29 @@ h5 {
 
 .quiz-top-bar {
     position: relative;
-    display: flex;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
     align-items: center;
-    justify-content: space-between;
-    flex-wrap: nowrap;
     min-height: 64px;
     width: 100%;
     padding-inline: clamp(0.35rem, 1vw, 0.75rem);
-    gap: 0.95rem;
+    column-gap: clamp(0.75rem, 2vw, 1.35rem);
 }
 
 .quiz-top-bar .quiz-timer {
     position: relative;
     z-index: 2;
     flex: 0 0 auto;
+    justify-self: start;
 }
 
 .quiz-scoreboard {
-    position: absolute;
-    left: 50%;
-    transform: translateX(-50%);
+    position: static;
     display: inline-flex;
     align-items: center;
     gap: 0.75rem;
     min-width: 0;
+    justify-self: center;
 }
 
 .quiz-score {
@@ -959,14 +966,17 @@ h5 {
 }
 
 .header-finish-btn {
-    min-width: 126px;
+    min-width: 120px;
+    width: clamp(120px, 18vw, 160px);
+    max-width: 160px;
     flex: 0 0 auto;
     white-space: nowrap;
+    justify-self: end;
 }
 
 @media (max-width: 420px) {
     .quiz-top-bar {
-        gap: 0.7rem;
+        column-gap: 0.7rem;
     }
 
     .quiz-timer,
@@ -984,12 +994,15 @@ h5 {
     .quiz-score__value {
         min-width: 1.4rem;
     }
+    .quiz-top-bar {
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+    }
 }
 
 @media (max-width: 360px) {
     .quiz-top-bar {
         padding-inline: 0.25rem;
-        gap: 0.45rem;
+        column-gap: 0.45rem;
     }
 
     .quiz-timer,
@@ -1295,8 +1308,9 @@ h5 {
 }
 
 .admin-exit-btn {
-    min-width: 140px;
-    padding-inline: 12px !important;
+    min-width: 120px;
+    padding-inline: 10px !important;
+    justify-content: center;
 }
 
 .admin-topics-list {
@@ -1306,7 +1320,7 @@ h5 {
 .admin-topic-row {
     display: flex;
     flex-direction: column;
-    gap: 0.85rem;
+    gap: 0.65rem;
     align-items: stretch;
     padding: 0.9rem 1rem;
     border: 1px solid #e5e7eb;
@@ -1345,8 +1359,9 @@ h5 {
 }
 
 .admin-question-card.is-highlighted {
-    border-color: #93c5fd;
-    box-shadow: 0 12px 24px rgba(59, 130, 246, 0.2);
+    border-color: #34d399;
+    box-shadow: 0 14px 26px rgba(52, 211, 153, 0.35);
+    background: linear-gradient(145deg, rgba(16, 185, 129, 0.08), rgba(209, 250, 229, 0.35));
 }
 
 .admin-question-card .form-label {
@@ -1390,6 +1405,29 @@ h5 {
 .admin-topic-row-3 .btn,
 .admin-topic-row-4 .btn {
     min-width: 180px;
+}
+
+.admin-topic-row-3 {
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-topic-row-3 .action-slot {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.admin-topic-row-3 .action-slot.is-editing {
+    justify-content: flex-end;
+}
+
+.admin-topic-row-4 {
+    justify-content: center;
+    align-items: center;
+}
+.history-attempts-section {
+    padding-top: 0.5rem;
 }
 
 .admin-back-btn {
@@ -1672,14 +1710,21 @@ h5 {
 .app-footer {
     border-top: 1px solid #e5e7eb;
     background: linear-gradient(120deg, #f8fafc, #eef2ff);
+    box-shadow: 0 -6px 16px rgba(15, 23, 42, 0.06);
 }
 
-.footer-link-btn {
+.footer-link {
     color: #0f172a;
+    text-decoration: none;
+    font-weight: 700;
 }
 
-.footer-link-btn:hover,
-.footer-link-btn:focus {
+.footer-link:hover,
+.footer-link:focus {
     color: #2563eb;
     text-decoration: none;
+}
+
+.version-link {
+    margin-right: 1px;
 }
