@@ -1,11 +1,11 @@
-import { AppLayout } from "../../layouts/AppLayout.jsx";
+import { UserLayout } from "../../layouts/UserLayout.jsx";
 import { QuizScreen } from "../../screens/QuizScreen.jsx";
 
 const QuizPage = () => {
   return (
-    <AppLayout>
+    <UserLayout>
       <QuizScreen />
-    </AppLayout>
+    </UserLayout>
   );
 };
 

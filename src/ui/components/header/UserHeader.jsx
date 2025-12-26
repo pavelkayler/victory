@@ -1,0 +1,117 @@
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import Row from "react-bootstrap/Row";
+import Stack from "react-bootstrap/Stack";
+import { Link } from "react-router-dom";
+
+import { HeaderShell } from "./HeaderShell.jsx";
+
+const UserHeader = ({
+  onTopicClick,
+  isHistoryPage,
+  displayName,
+  onLogout,
+  showUserRow,
+}) => {
+  return (
+    <HeaderShell>
+      <Container fluid className="p-0">
+        <Row className="gy-2 align-items-center d-none d-md-flex">
+          <Col xs="auto" className="flex-shrink-0">
+            <Button
+              variant="outline-primary"
+              className="nav-pill-btn"
+              as={Link}
+              to="/topics"
+              type="button"
+              onClick={onTopicClick}
+            >
+              Выбор темы
+            </Button>
+          </Col>
+          <Col className="d-flex justify-content-center">
+            {showUserRow && (
+              <Stack
+                direction="horizontal"
+                gap={2}
+                className="user-header-bar flex-nowrap justify-content-center"
+              >
+                <i className="bi bi-person-circle text-primary" aria-hidden="true" />
+                <span className="fw-semibold user-name user-name--desktop text-truncate" title={displayName}>
+                  {displayName}
+                </span>
+                <Button
+                  variant="outline-danger"
+                  type="button"
+                  className="user-logout-btn"
+                  onClick={onLogout}
+                >
+                  Выйти
+                </Button>
+              </Stack>
+            )}
+          </Col>
+          <Col xs="auto" className="flex-shrink-0">
+            <Button
+              variant="outline-primary"
+              className="nav-pill-btn"
+              as={Link}
+              to={isHistoryPage ? "/topics" : "/history"}
+              type="button"
+            >
+              {isHistoryPage ? "Пройти тест" : "История"}
+            </Button>
+          </Col>
+        </Row>
+
+        <Row className="gy-2 align-items-center d-flex d-md-none">
+          <Col xs={12}>
+            <div className="d-flex justify-content-between align-items-center gap-2 flex-nowrap">
+              <Button
+                variant="outline-primary"
+                className="nav-pill-btn flex-grow-1 text-truncate"
+                as={Link}
+                to="/topics"
+                type="button"
+                onClick={onTopicClick}
+              >
+                Выбор темы
+              </Button>
+              <Button
+                variant="outline-primary"
+                className="nav-pill-btn flex-grow-1 text-truncate"
+                as={Link}
+                to={isHistoryPage ? "/topics" : "/history"}
+                type="button"
+              >
+                {isHistoryPage ? "Пройти тест" : "История"}
+              </Button>
+            </div>
+          </Col>
+
+          {showUserRow && (
+            <Col xs={12} className="pt-2">
+              <div className="d-flex justify-content-center align-items-center gap-2 flex-nowrap">
+                <i className="bi bi-person-circle text-primary" aria-hidden="true" />
+                <span className="fw-semibold user-name text-truncate flex-grow-1 text-center" title={displayName}>
+                  {displayName}
+                </span>
+                <Button
+                  variant="outline-danger"
+                  type="button"
+                  className="user-logout-btn flex-shrink-0"
+                  onClick={onLogout}
+                >
+                  Выйти
+                </Button>
+              </div>
+            </Col>
+          )}
+        </Row>
+      </Container>
+    </HeaderShell>
+  );
+};
+
+export { UserHeader };

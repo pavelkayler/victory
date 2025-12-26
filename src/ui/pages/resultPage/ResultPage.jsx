@@ -1,11 +1,11 @@
-import { AppLayout } from "../../layouts/AppLayout.jsx";
+import { UserLayout } from "../../layouts/UserLayout.jsx";
 import { ResultScreen } from "../../screens/ResultScreen.jsx";
 
 const ResultPage = () => {
   return (
-    <AppLayout>
+    <UserLayout>
       <ResultScreen />
-    </AppLayout>
+    </UserLayout>
   );
 };
 

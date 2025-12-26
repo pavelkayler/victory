@@ -1,11 +1,11 @@
-import { AppLayout } from "../../layouts/AppLayout.jsx";
+import { UserLayout } from "../../layouts/UserLayout.jsx";
 import { TopicsScreen } from "../../screens/TopicsScreen.jsx";
 
 const TopicsPage = () => {
   return (
-    <AppLayout>
+    <UserLayout>
       <TopicsScreen />
-    </AppLayout>
+    </UserLayout>
   );
 };
 

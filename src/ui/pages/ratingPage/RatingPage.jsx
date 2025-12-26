@@ -1,10 +1,10 @@
-import { AppLayout } from "../../layouts/AppLayout.jsx";
+import { UserLayout } from "../../layouts/UserLayout.jsx";
 import { RatingScreen } from "../../screens/RatingScreen.jsx";
 
 const RatingPage = () => (
-  <AppLayout>
+  <UserLayout>
     <RatingScreen />
-  </AppLayout>
+  </UserLayout>
 );
 
 export default RatingPage;

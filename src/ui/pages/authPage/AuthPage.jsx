@@ -1,11 +1,11 @@
 import { AuthScreen } from "../../screens/AuthScreen.jsx";
-import { AppLayout } from "../../layouts/AppLayout.jsx";
+import { UserLayout } from "../../layouts/UserLayout.jsx";
 
 const AuthPage = () => {
   return (
-    <AppLayout>
+    <UserLayout>
       <AuthScreen />
-    </AppLayout>
+    </UserLayout>
   );
 };
 
