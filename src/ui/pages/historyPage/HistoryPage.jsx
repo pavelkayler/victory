@@ -1,10 +1,10 @@
-import { History } from "../../components/history/History.jsx";
 import { AppLayout } from "../../layouts/AppLayout.jsx";
+import { HistoryScreen } from "../../screens/HistoryScreen.jsx";
 
 const HistoryPage = () => {
   return (
     <AppLayout>
-      <History />
+      <HistoryScreen />
     </AppLayout>
   );
 };

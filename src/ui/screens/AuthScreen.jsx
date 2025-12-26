@@ -1,10 +1,22 @@
 import { useContext, useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
-import { Container, Row, Col, Card, CardBody, CardTitle, Form, FormGroup, FormLabel, FormControl, Button } from "react-bootstrap";
+import { Navigate, useNavigate } from "react-router-dom";
+import {
+  Button,
+  Card,
+  CardBody,
+  CardTitle,
+  Col,
+  Container,
+  Form,
+  FormControl,
+  FormGroup,
+  FormLabel,
+  Row,
+} from "react-bootstrap";
 
-import { UserContext } from "../../../core/context/Context.jsx";
+import { UserContext } from "../../core/context/Context.jsx";
 
-const Auth = () => {
+const AuthScreen = () => {
   const { isAuth, login } = useContext(UserContext);
 
   const [name, setName] = useState("");
@@ -57,4 +69,4 @@ const Auth = () => {
   );
 };
 
-export { Auth };
+export { AuthScreen };

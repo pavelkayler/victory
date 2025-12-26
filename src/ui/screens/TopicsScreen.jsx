@@ -1,21 +1,22 @@
 import { useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Container,
+  Alert,
+  Badge,
+  Button,
   Card,
   CardBody,
-  CardTitle,
   CardText,
-  Button,
-  Alert,
+  CardTitle,
+  Container,
 } from "react-bootstrap";
 
-import { QuizContext, TopicsContext } from "../../../core/context/Context.jsx";
-import { useAuthGuard } from "../../../core/hooks/useAuthGuard.js";
-import { MIN_PAIRS } from "../../../core/constants/quiz.js";
-import { isQuestionValid } from "../../../core/utils/questions.js";
+import { QuizContext, TopicsContext } from "../../core/context/Context.jsx";
+import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
+import { MIN_PAIRS } from "../../core/constants/quiz.js";
+import { isQuestionValid } from "../../core/utils/questions.js";
 
-const Topics = () => {
+const TopicsScreen = () => {
   const { initQuiz } = useContext(QuizContext);
   const { topics } = useContext(TopicsContext);
   const navigate = useNavigate();
@@ -64,10 +65,10 @@ const Topics = () => {
                         {topic.description}
                       </CardText>
                       <div className="d-flex align-items-center gap-2 mb-2 flex-wrap">
-                        <span className="badge bg-light text-dark">
+                        <Badge bg="light" text="dark">
                           <i className="bi bi-list-check me-1" aria-hidden="true" />
                           {totalCount} вопросов
-                        </span>
+                        </Badge>
                       </div>
                       <Button
                         variant="primary"
@@ -94,4 +95,4 @@ const Topics = () => {
   );
 };
 
-export { Topics };
+export { TopicsScreen };

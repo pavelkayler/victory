@@ -1,20 +1,20 @@
 import { useContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import {
-  Container,
+  Button,
   Card,
   CardBody,
-  CardTitle,
   CardText,
-  Button,
+  CardTitle,
+  Container,
   ListGroup,
   ListGroupItem,
 } from "react-bootstrap";
 
-import { QuizContext } from "../../../core/context/Context.jsx";
-import { useAuthGuard } from "../../../core/hooks/useAuthGuard.js";
+import { QuizContext } from "../../core/context/Context.jsx";
+import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
 
-const Result = () => {
+const ResultScreen = () => {
   const { questions, score, errorsCount, initQuiz, isQuizFinished } =
     useContext(QuizContext);
 
@@ -39,7 +39,9 @@ const Result = () => {
         <div className="d-flex flex-column gap-4">
           <Card className="shadow-sm page-card text-center">
             <CardBody>
-              <CardTitle className="fs-3 mb-3"><i className="bi bi-trophy-fill me-2 text-warning" />Результат</CardTitle>
+              <CardTitle className="fs-3 mb-3">
+                <i className="bi bi-trophy-fill me-2 text-warning" />Результат
+              </CardTitle>
               <CardText className="fs-5 mb-2">
                 Правильных ответов: {score}
               </CardText>
@@ -80,4 +82,4 @@ const Result = () => {
   );
 };
 
-export { Result };
+export { ResultScreen };
