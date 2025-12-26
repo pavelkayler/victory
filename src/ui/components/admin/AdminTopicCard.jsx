@@ -1,4 +1,5 @@
-import { Badge, Button } from "react-bootstrap";
+import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
 
 import { pluralRu } from "../../../core/utils/pluralRu.js";
 
@@ -8,11 +9,13 @@ const AdminTopicCard = ({ topic, onEdit }) => {
   return (
     <div className="admin-topic-row">
       <div className="admin-topic-row__meta">
-        <div className="fw-semibold text-break">{topic.title}</div>
-        <div className="text-muted small text-break">{topic.description}</div>
-        <Badge bg="light" text="dark" className="fw-semibold">
-          {questionsLabel}
-        </Badge>
+        <div className="admin-topic-row__top">
+          <div className="admin-topic-row__title fw-semibold text-break">{topic.title}</div>
+          <Badge bg="light" text="dark" className="admin-topic-row__count fw-semibold">
+            {questionsLabel}
+          </Badge>
+        </div>
+        <div className="text-muted small text-break admin-topic-row__desc">{topic.description}</div>
       </div>
 
       <div className="admin-topic-row__actions">

@@ -1,4 +1,6 @@
-import { Button, Col, Row } from "react-bootstrap";
+import Button from "react-bootstrap/Button";
+import Col from "react-bootstrap/Col";
+import Row from "react-bootstrap/Row";
 
 const TopicActionsRow = ({
   isEditingTopic,
@@ -42,7 +44,7 @@ const TopicActionsRow = ({
         </Col>
       </Row>
 
-      <Row className="mt-3 admin-topic-row-4">
+      <Row className="mt-3 mb-3 admin-topic-row-4">
         <Col className="d-flex justify-content-center">
           <Button variant="success" onClick={onAddQuestion} type="button">
             <i className="bi bi-plus-lg me-2" aria-hidden="true" />
