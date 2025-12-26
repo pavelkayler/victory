@@ -1,12 +1,15 @@
-import { Col, FormLabel, FormSelect, Row } from "react-bootstrap";
+import Col from "react-bootstrap/Col";
+import FormLabel from "react-bootstrap/FormLabel";
+import FormSelect from "react-bootstrap/FormSelect";
+import Row from "react-bootstrap/Row";
 
 const HistoryFilter = ({ selectedTopicId, topics, onChange }) => {
   return (
-    <Row className="gy-2 gx-3 align-items-center">
+    <Row className="gy-2 gx-3 align-items-center mb-3">
       <Col xs={12} className="history-filter-wrap">
-        <FormLabel className="fw-semibold d-block mb-1">Фильтр по теме</FormLabel>
+        <FormLabel className="fw-semibold d-block mb-2">Фильтр по теме</FormLabel>
         <FormSelect
-          className="w-100 mt-2"
+          className="w-100"
           value={selectedTopicId}
           onChange={(event) => onChange(event.target.value)}
         >

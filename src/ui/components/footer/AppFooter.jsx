@@ -1,16 +1,16 @@
-import { Container } from "react-bootstrap";
+import Container from "react-bootstrap/Container";
 import { Link } from "react-router-dom";
 
-import { APP_VERSION } from "../../../core/version.js";
 import { ADMIN_PATH } from "../../../core/constants/paths.js";
+import { APP_VERSION } from "../../../appVersion.js";
 
-const Footer = () => {
+const AppFooter = () => {
   const currentYear = new Date().getFullYear();
 
   return (
-    <footer className="app-footer mt-auto">
-      <Container fluid className="py-3">
-        <div className="footer-desktop d-none d-md-flex justify-content-center align-items-center gap-2 flex-wrap">
+    <footer className="user-footer mt-auto">
+      <Container fluid className="user-footer__container">
+        <div className="d-none d-md-flex justify-content-center align-items-center gap-2 flex-wrap">
           <span className="fw-semibold d-inline-flex align-items-center gap-1">
             <i className="bi bi-c-circle" aria-hidden="true" />
             <a
@@ -23,15 +23,17 @@ const Footer = () => {
             </a>
           </span>
           <span className="text-muted">·</span>
-          <span className="fw-semibold">{currentYear}</span>
-          <span className="text-muted">·</span>
           <span className="fw-semibold">
-            <Link to={ADMIN_PATH} className="footer-link version-link">v</Link>
+            <Link to={ADMIN_PATH} className="footer-link version-link">
+              v
+            </Link>
             {APP_VERSION}
           </span>
+          <span className="text-muted">·</span>
+          <span className="fw-semibold">{currentYear}</span>
         </div>
 
-        <div className="footer-mobile d-flex d-md-none justify-content-center align-items-center gap-2">
+        <div className="d-flex d-md-none justify-content-center align-items-center gap-2">
           <i className="bi bi-c-circle" aria-hidden="true" />
           <a
             href="https://github.com/pavelkayler"
@@ -47,4 +49,4 @@ const Footer = () => {
   );
 };
 
-export { Footer };
+export { AppFooter };

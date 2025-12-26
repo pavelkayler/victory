@@ -1,11 +1,11 @@
-import { AppLayout } from "../../layouts/AppLayout.jsx";
+import { AdminLayout } from "../../layouts/AdminLayout.jsx";
 import { AdminTopicScreen } from "../../screens/AdminTopicScreen.jsx";
 
 const AdminTopicPage = () => {
   return (
-    <AppLayout>
+    <AdminLayout>
       <AdminTopicScreen />
-    </AppLayout>
+    </AdminLayout>
   );
 };
 
