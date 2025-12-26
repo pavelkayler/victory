@@ -45,12 +45,13 @@ const QuizColumns = ({ hasStarted }) => {
       : "quiz-text-hidden";
 
     const isLeft = side === "left";
+    const matchSideClass = isLeft ? "match-card--left" : "match-card--right";
 
     return (
       <ListGroupItem
         key={item.id}
         variant={variant}
-        className={`quiz-item ${isLeft ? "quiz-item-left" : "quiz-item-right"}`}
+        className={`quiz-item ${isLeft ? "quiz-item-left" : "quiz-item-right"} ${matchSideClass}`}
         onClick={handleClick}
       >
         <span className={`quiz-text ${isLeft ? "text-end" : "text-start"} ${textClass}`}>

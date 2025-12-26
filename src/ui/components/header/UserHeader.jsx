@@ -67,10 +67,10 @@ const UserHeader = ({
 
         <Row className="gy-2 align-items-center d-flex d-md-none">
           <Col xs={12}>
-            <div className="d-flex justify-content-between align-items-center gap-2 flex-nowrap">
+            <div className="user-header-mobile-actions">
               <Button
                 variant="outline-primary"
-                className="nav-pill-btn flex-grow-1 text-truncate"
+                className="nav-pill-btn user-header-mobile-btn"
                 as={Link}
                 to="/topics"
                 type="button"
@@ -80,7 +80,7 @@ const UserHeader = ({
               </Button>
               <Button
                 variant="outline-primary"
-                className="nav-pill-btn flex-grow-1 text-truncate"
+                className="nav-pill-btn user-header-mobile-btn"
                 as={Link}
                 to={isHistoryPage ? "/topics" : "/history"}
                 type="button"
@@ -91,16 +91,18 @@ const UserHeader = ({
           </Col>
 
           {showUserRow && (
-            <Col xs={12} className="pt-2">
-              <div className="d-flex justify-content-center align-items-center gap-2 flex-nowrap">
-                <i className="bi bi-person-circle text-primary" aria-hidden="true" />
-                <span className="fw-semibold user-name text-truncate flex-grow-1 text-center" title={displayName}>
-                  {displayName}
-                </span>
+            <Col xs={12} className="user-header-mobile-user-row">
+              <div className="user-header-mobile-user">
+                <div className="user-header-mobile-identity">
+                  <i className="bi bi-person-circle text-primary" aria-hidden="true" />
+                  <span className="fw-semibold user-name user-header-mobile-name" title={displayName}>
+                    {displayName}
+                  </span>
+                </div>
                 <Button
                   variant="outline-danger"
                   type="button"
-                  className="user-logout-btn flex-shrink-0"
+                  className="user-logout-btn user-header-mobile-logout"
                   onClick={onLogout}
                 >
                   Выйти
