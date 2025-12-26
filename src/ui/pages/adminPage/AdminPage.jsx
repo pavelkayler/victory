@@ -244,12 +244,12 @@ const AdminPage = () => {
         </div>
       </Container>
 
-      <ToastContainer position="top-center" className="mt-3">
+      <ToastContainer position="bottom-center" className="mb-3">
         <Toast
           bg={toastState.bg}
           onClose={() => setToastState((prev) => ({ ...prev, show: false }))}
           show={toastState.show}
-          delay={2400}
+          delay={2600}
           autohide
         >
           <Toast.Body className="text-white">{toastState.message}</Toast.Body>

@@ -1,13 +1,12 @@
 import { useContext, useEffect, useMemo } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { Navbar, Container, Button } from "react-bootstrap";
+import { Navbar, Container, Button, Stack } from "react-bootstrap";
 
 import { AdminContext, QuizContext, UserContext } from "../../../core/context/Context.jsx";
-import { UserBar } from "../userBar/UserBar.jsx";
 
 const Header = () => {
   const location = useLocation();
-  const { isAuth, userName } = useContext(UserContext);
+  const { isAuth, userName, logout } = useContext(UserContext);
   const { isAdminAuthed, logoutAdmin } = useContext(AdminContext);
   const {
     topic,
@@ -60,8 +59,14 @@ const Header = () => {
     return null;
   }
 
+  const displayName = userName?.trim() || "Пользователь";
+
   const handleTopicClick = () => {
     resetTopic();
+  };
+
+  const handleLogout = () => {
+    logout();
   };
 
   const showQuizControls = isQuizPage && wasStarted && !isQuizFinished;
@@ -79,7 +84,6 @@ const Header = () => {
         {showQuizControls ? (
           <div className="quiz-top-bar">
             <div className={`quiz-timer ${isCountdownActive ? "is-counting" : ""}`} aria-live="polite">
-              <i className="bi bi-stopwatch me-2 text-warning" />
               <span className="fw-semibold">{isCountdownActive ? countdownText : timerText}</span>
             </div>
 
@@ -103,28 +107,71 @@ const Header = () => {
             </Button>
           </div>
         ) : (
-          <div className="header-grid header-grid--compact">
-            <Navbar.Brand
-              as={Link}
-              to="/topics"
-              onClick={handleTopicClick}
-              className="brand-topic header-grid__brand"
-            >
-              {isTopicsPage || isHistoryPage ? "Выбор темы" : topic?.title || "Тема"}
-            </Navbar.Brand>
-
-            <div className="header-grid__actions">
-              {showUserHeaderBar && <UserBar />}
-              <Button
-                variant="outline-primary"
-                className="nav-pill-btn"
+          <div className="w-100">
+            <div className="user-header-row">
+              <Navbar.Brand
                 as={Link}
-                to={isHistoryPage ? "/topics" : "/history"}
-                type="button"
+                to="/topics"
+                onClick={handleTopicClick}
+                className="brand-topic header-grid__brand mb-0"
               >
-                {isHistoryPage ? "Пройти тест" : "История"}
-              </Button>
+                {isTopicsPage || isHistoryPage ? "Выбор темы" : topic?.title || "Тема"}
+              </Navbar.Brand>
+
+              <div className="d-flex align-items-center gap-2 flex-wrap justify-content-end">
+                {showUserHeaderBar && (
+                  <Stack
+                    direction="horizontal"
+                    gap={2}
+                    className="align-items-center d-none d-md-inline-flex user-header-desktop"
+                  >
+                    <div className="d-inline-flex align-items-center gap-2 flex-nowrap">
+                      <i className="bi bi-person-circle text-primary" aria-hidden="true" />
+                      <span className="fw-semibold user-name" title={displayName}>
+                        {displayName}
+                      </span>
+                    </div>
+                    <Button
+                      variant="outline-danger"
+                      type="button"
+                      className="user-logout-btn"
+                      onClick={handleLogout}
+                    >
+                      Выйти
+                    </Button>
+                  </Stack>
+                )}
+
+                <Button
+                  variant="outline-primary"
+                  className="nav-pill-btn"
+                  as={Link}
+                  to={isHistoryPage ? "/topics" : "/history"}
+                  type="button"
+                >
+                  {isHistoryPage ? "Пройти тест" : "История"}
+                </Button>
+              </div>
             </div>
+
+            {showUserHeaderBar && (
+              <div className="user-header-mobile-row d-flex d-md-none">
+                <div className="d-inline-flex align-items-center gap-2 flex-grow-1 min-w-0">
+                  <i className="bi bi-person-circle text-primary" aria-hidden="true" />
+                  <span className="fw-semibold user-name" title={displayName}>
+                    {displayName}
+                  </span>
+                </div>
+                <Button
+                  variant="outline-danger"
+                  type="button"
+                  className="user-logout-btn flex-shrink-0"
+                  onClick={handleLogout}
+                >
+                  Выйти
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </Container>
