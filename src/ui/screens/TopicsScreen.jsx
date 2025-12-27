@@ -1,14 +1,12 @@
 import { useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import {
-  Badge,
-  Button,
-  Card,
-  CardBody,
-  CardText,
-  CardTitle,
-  Container,
-} from "react-bootstrap";
+import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import CardBody from "react-bootstrap/CardBody";
+import CardText from "react-bootstrap/CardText";
+import CardTitle from "react-bootstrap/CardTitle";
+import Container from "react-bootstrap/Container";
 
 import { QuizContext, TopicsContext } from "../../core/context/Context.jsx";
 import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
@@ -56,23 +54,29 @@ const TopicsScreen = () => {
                 const totalCount = topic.questions.length;
                 const canStart = validCount >= MIN_PAIRS;
                 const badgeText = `${totalCount} ${pluralRu(totalCount, ["вопрос", "вопроса", "вопросов"])}`;
+                const timeLimitText = `${topic.timeLimitMin ?? 5} минут`;
 
                 return (
                   <Card key={topic.id} className="mb-3 border-primary">
                     <CardBody>
-                      <CardTitle className="fs-5 mb-2 d-flex align-items-start gap-2">
-                        <i className="bi bi-book-half text-primary" aria-hidden="true" />
-                        <span>{topic.title}</span>
+                      <CardTitle className="fs-5 mb-2">
+                        <div className="topic-card-header">
+                          <div className="topic-card-title d-flex align-items-start gap-2">
+                            <i className="bi bi-book-half text-primary" aria-hidden="true" />
+                            <span className="text-break">{topic.title}</span>
+                          </div>
+                          <div className="topic-card-timer text-center fw-semibold">
+                            {timeLimitText}
+                          </div>
+                          <Badge bg="light" text="dark" className="fw-semibold topic-card-count">
+                            {badgeText}
+                          </Badge>
+                        </div>
                       </CardTitle>
                       <CardText className="mb-3 text-muted">
                         {topic.description}
                       </CardText>
-                      <div className="d-flex align-items-center gap-2 mb-3 flex-wrap">
-                        <Badge bg="light" text="dark" className="fw-semibold">
-                          {badgeText}
-                        </Badge>
-                      </div>
-                      <div className="d-flex flex-wrap gap-2">
+                      <div className="topic-card-actions d-flex flex-wrap gap-2 align-items-center">
                         <Button
                           variant="primary"
                           type="button"
@@ -81,14 +85,16 @@ const TopicsScreen = () => {
                         >
                           Пройти тест
                         </Button>
-                        <Button
-                          variant="outline-secondary"
-                          as={Link}
-                          to={`/rating/${topic.id}`}
-                          type="button"
-                        >
-                          Рейтинг
-                        </Button>
+                        <div className="ms-auto topic-card-rating">
+                          <Button
+                            variant="outline-secondary"
+                            as={Link}
+                            to={`/rating/${topic.id}`}
+                            type="button"
+                          >
+                            Рейтинг
+                          </Button>
+                        </div>
                       </div>
                       {!canStart && (
                         <CardText className="text-danger small mt-2 mb-0">

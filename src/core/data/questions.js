@@ -4,6 +4,7 @@ const topics = [
     title: "React: основы и практики",
     description:
       "Сопоставляйте вопросы по React с краткими ответами, чтобы освежить знания по хукам, состоянию и жизненному циклу.",
+    timeLimitMin: 5,
     questions: [
       {
         id: 1,
@@ -92,6 +93,7 @@ const topics = [
     title: "English & Russian words",
     description:
       "Соотнесите английские слова с их русскими переводами и потренируйте словарный запас.",
+    timeLimitMin: 5,
     questions: [
       { id: 1, left: "apple", right: "яблоко" },
       { id: 2, left: "bridge", right: "мост" },

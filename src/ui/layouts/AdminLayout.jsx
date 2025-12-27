@@ -1,13 +1,10 @@
 import { useContext, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
 
 import { AdminContext, UserContext } from "../../core/context/Context.jsx";
-import { ADMIN_PATH } from "../../core/constants/paths.js";
 
 const AdminLayout = ({ children }) => {
   const { isAdminAuthed, logoutAdmin } = useContext(AdminContext);
   const { logout } = useContext(UserContext);
-  const navigate = useNavigate();
 
   useEffect(() => {
     logout();
@@ -16,9 +13,8 @@ const AdminLayout = ({ children }) => {
   useEffect(() => {
     if (!isAdminAuthed) {
       logoutAdmin();
-      navigate(ADMIN_PATH, { replace: true });
     }
-  }, [isAdminAuthed, logoutAdmin, navigate]);
+  }, [isAdminAuthed, logoutAdmin]);
 
   return (
     <div className="app-shell">

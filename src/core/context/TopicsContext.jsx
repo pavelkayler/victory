@@ -1,8 +1,16 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
-
 import { topics as defaultTopics } from "../data/questions.js";
 
 const TOPICS_STORAGE_KEY = "quiz-topics";
+
+const clampTimeLimit = (value) => {
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed)) {
+    return null;
+  }
+
+  return Math.min(60, Math.max(1, parsed));
+};
 
 const readStoredTopics = () => {
   if (typeof localStorage === "undefined") {
@@ -16,7 +24,15 @@ const readStoredTopics = () => {
     }
 
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : defaultTopics;
+    if (!Array.isArray(parsed)) {
+      return defaultTopics;
+    }
+
+    return parsed.map((topic) => ({
+      ...topic,
+      timeLimitMin: clampTimeLimit(topic?.timeLimitMin ?? 5) ?? 5,
+      questions: Array.isArray(topic?.questions) ? topic.questions : [],
+    }));
   } catch (error) {
     console.error("Failed to read topics from storage", error);
     return defaultTopics;
@@ -44,9 +60,10 @@ const TopicsProvider = ({ children }) => {
     return topics.find((topic) => topic.id === topicId) ?? null;
   }, [topics]);
 
-  const addTopic = useCallback((title, description) => {
+  const addTopic = useCallback((title, description, timeLimitMin = 5) => {
     const trimmedTitle = title.trim();
     const trimmedDescription = description.trim();
+    const normalizedTimeLimit = clampTimeLimit(timeLimitMin) ?? 5;
 
     const id =
       typeof crypto !== "undefined" && crypto.randomUUID
@@ -57,6 +74,7 @@ const TopicsProvider = ({ children }) => {
       id,
       title: trimmedTitle || "Новая тема",
       description: trimmedDescription || "Добавьте описание темы и вопросы",
+      timeLimitMin: normalizedTimeLimit,
       questions: [],
     };
 
@@ -70,8 +88,14 @@ const TopicsProvider = ({ children }) => {
       patch.title !== undefined ? patch.title.trim() : undefined;
     const trimmedDescription =
       patch.description !== undefined ? patch.description.trim() : undefined;
+    const normalizedTimeLimit =
+      patch.timeLimitMin !== undefined ? clampTimeLimit(patch.timeLimitMin) : undefined;
 
-    if (trimmedTitle === undefined && trimmedDescription === undefined) {
+    if (
+      trimmedTitle === undefined
+      && trimmedDescription === undefined
+      && normalizedTimeLimit === undefined
+    ) {
       return;
     }
 
@@ -89,6 +113,7 @@ const TopicsProvider = ({ children }) => {
           ...topic,
           title: trimmedTitle ?? topic.title,
           description: trimmedDescription ?? topic.description,
+          timeLimitMin: normalizedTimeLimit ?? topic.timeLimitMin ?? 5,
         };
       }),
     );

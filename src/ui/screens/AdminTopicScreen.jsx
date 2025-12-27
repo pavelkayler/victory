@@ -1,17 +1,15 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useContext, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardSubtitle,
-  CardTitle,
-  Col,
-  Container,
-  FormSelect,
-  Row,
-} from "react-bootstrap";
+import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import CardBody from "react-bootstrap/CardBody";
+import CardSubtitle from "react-bootstrap/CardSubtitle";
+import CardTitle from "react-bootstrap/CardTitle";
+import Col from "react-bootstrap/Col";
+import Container from "react-bootstrap/Container";
+import FormSelect from "react-bootstrap/FormSelect";
+import Row from "react-bootstrap/Row";
 
 import { TopicsContext } from "../../core/context/Context.jsx";
 import { ADMIN_PATH } from "../../core/constants/paths.js";
@@ -49,6 +47,7 @@ const AdminTopicScreen = () => {
   const [isEditingTopicMeta, setIsEditingTopicMeta] = useState(false);
   const [topicTitleDraft, setTopicTitleDraft] = useState("");
   const [topicDescriptionDraft, setTopicDescriptionDraft] = useState("");
+  const [topicTimeLimitDraft, setTopicTimeLimitDraft] = useState(5);
   const [toastState, setToastState] = useState({
     show: false,
     message: "",
@@ -62,12 +61,14 @@ const AdminTopicScreen = () => {
       setQuestionDrafts({});
       setTopicTitleDraft("");
       setTopicDescriptionDraft("");
+      setTopicTimeLimitDraft(5);
       setDraftQuestion(null);
       return;
     }
 
     setTopicTitleDraft(topic.title ?? "");
     setTopicDescriptionDraft(topic.description ?? "");
+    setTopicTimeLimitDraft(topic.timeLimitMin ?? 5);
     setQuestionDrafts((prev) => {
       const next = {};
       topic.questions.forEach((question) => {
@@ -90,6 +91,10 @@ const AdminTopicScreen = () => {
   }, [location.state]);
 
   const questions = useMemo(() => topic?.questions ?? [], [topic]);
+  const parsedTimeLimit = Number(topicTimeLimitDraft);
+  const isTimeLimitValid = Number.isFinite(parsedTimeLimit)
+    && parsedTimeLimit >= 1
+    && parsedTimeLimit <= 60;
 
   const showToast = (message, bg = "success") => {
     setToastState({ show: true, message, bg });
@@ -290,6 +295,14 @@ const AdminTopicScreen = () => {
       return;
     }
     const trimmedTitle = topicTitleDraft.trim();
+    const parsedLimit = Number(topicTimeLimitDraft);
+
+    if (!Number.isFinite(parsedLimit) || parsedLimit <= 0) {
+      showToast("Укажите время от 1 до 60 минут", "danger");
+      return;
+    }
+
+    const normalizedTimeLimit = Math.min(60, Math.max(1, parsedLimit));
 
     if (!trimmedTitle) {
       return;
@@ -298,6 +311,7 @@ const AdminTopicScreen = () => {
     updateTopic(topic.id, {
       title: trimmedTitle,
       description: topicDescriptionDraft,
+      timeLimitMin: normalizedTimeLimit,
     });
     setIsEditingTopicMeta(false);
     showToast("Сохранено");
@@ -306,6 +320,7 @@ const AdminTopicScreen = () => {
   const handleCancelTopicMeta = () => {
     setTopicTitleDraft(topic?.title ?? "");
     setTopicDescriptionDraft(topic?.description ?? "");
+    setTopicTimeLimitDraft(topic?.timeLimitMin ?? 5);
     setIsEditingTopicMeta(false);
   };
 
@@ -378,14 +393,17 @@ const AdminTopicScreen = () => {
               <TopicHero topic={topic} questionsCount={questions.length} />
             )}
 
-            <TopicActionsRow
-              isEditingTopic={isEditingTopicMeta}
-              onEditTopic={handleStartEditTopicMeta}
-              onAddQuestion={handleAddQuestion}
-              onCancelEdit={handleCancelTopicMeta}
-              onSaveTopic={handleSaveTopicMeta}
-              isSaveDisabled={!topicTitleDraft.trim()}
-            />
+              <TopicActionsRow
+                isEditingTopic={isEditingTopicMeta}
+                onEditTopic={handleStartEditTopicMeta}
+                onAddQuestion={handleAddQuestion}
+                onCancelEdit={handleCancelTopicMeta}
+                onSaveTopic={handleSaveTopicMeta}
+                isSaveDisabled={!topicTitleDraft.trim() || !isTimeLimitValid}
+                isTimeLimitValid={isTimeLimitValid}
+                timeLimit={topicTimeLimitDraft}
+                onChangeTimeLimit={setTopicTimeLimitDraft}
+              />
 
             <QuestionsList
               questions={displayedQuestions}

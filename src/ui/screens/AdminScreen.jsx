@@ -1,19 +1,17 @@
 import { useContext, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  Button,
-  Card,
-  CardBody,
-  CardSubtitle,
-  CardTitle,
-  Container,
-  Form,
-  FormControl,
-  FormGroup,
-  FormLabel,
-} from "react-bootstrap";
+import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import CardBody from "react-bootstrap/CardBody";
+import CardSubtitle from "react-bootstrap/CardSubtitle";
+import CardTitle from "react-bootstrap/CardTitle";
+import Container from "react-bootstrap/Container";
+import Form from "react-bootstrap/Form";
+import FormControl from "react-bootstrap/FormControl";
+import FormGroup from "react-bootstrap/FormGroup";
+import FormLabel from "react-bootstrap/FormLabel";
 
-import { AdminContext, TopicsContext } from "../../core/context/Context.jsx";
+import { AdminContext, TopicsContext, UserContext } from "../../core/context/Context.jsx";
 import { ADMIN_PATH } from "../../core/constants/paths.js";
 import { AppToast } from "../components/common/AppToast.jsx";
 import { AdminHeader } from "../components/admin/AdminHeader.jsx";
@@ -24,6 +22,7 @@ import { AdminAddTopicForm } from "../components/admin/AdminAddTopicForm.jsx";
 const AdminScreen = () => {
   const { isAdminAuthed, authorize, logoutAdmin } = useContext(AdminContext);
   const { topics, addTopic } = useContext(TopicsContext);
+  const { logout } = useContext(UserContext);
   const navigate = useNavigate();
 
   const [password, setPassword] = useState("");
@@ -31,6 +30,7 @@ const AdminScreen = () => {
 
   const [topicTitle, setTopicTitle] = useState("");
   const [topicDescription, setTopicDescription] = useState("");
+  const [topicTimeLimit, setTopicTimeLimit] = useState(5);
   const [topicError, setTopicError] = useState("");
   const [toastState, setToastState] = useState({
     show: false,
@@ -60,6 +60,7 @@ const AdminScreen = () => {
   const handleCreateTopic = (event) => {
     event.preventDefault();
     const nextTitle = topicTitle.trim();
+    const normalizedTimeLimit = Math.min(60, Math.max(1, Number(topicTimeLimit) || 5));
 
     if (!nextTitle) {
       setTopicError("Название обязательно.");
@@ -68,10 +69,11 @@ const AdminScreen = () => {
 
     setTopicError("");
     const nextDescription = topicDescription.trim();
-    addTopic(nextTitle, nextDescription);
+    addTopic(nextTitle, nextDescription, normalizedTimeLimit);
     showToast("Тема добавлена");
     setTopicTitle("");
     setTopicDescription("");
+    setTopicTimeLimit(5);
   };
 
   const handleEditClick = (topicId) => {
@@ -79,8 +81,9 @@ const AdminScreen = () => {
   };
 
   const handleLogoutAdmin = () => {
-    navigate("/", { replace: true });
     logoutAdmin();
+    logout();
+    navigate("/", { replace: true });
   };
 
   const showToast = (message, bg = "success") => {
@@ -142,6 +145,8 @@ const AdminScreen = () => {
               topicDescription={topicDescription}
               onChangeTitle={setTopicTitle}
               onChangeDescription={setTopicDescription}
+              timeLimit={topicTimeLimit}
+              onChangeTimeLimit={setTopicTimeLimit}
               onSubmit={handleCreateTopic}
               topicError={topicError}
             />

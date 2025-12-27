@@ -87,7 +87,12 @@ const pickRandomPrompt = (columns, prevPairId = null) => {
   };
 };
 
-const QUIZ_DURATION_SECONDS = 5 * 60; // 5 минут
+const clampTimeLimitSeconds = (topic) => {
+  const rawMinutes = Number(topic?.timeLimitMin ?? 5);
+  const safeMinutes = Number.isFinite(rawMinutes) && rawMinutes > 0 ? rawMinutes : 5;
+  const minutes = Math.min(60, Math.max(1, safeMinutes));
+  return minutes * 60;
+};
 
 const QuizProvider = ({ children }) => {
   const { userName } = useContext(UserContext);
@@ -95,9 +100,11 @@ const QuizProvider = ({ children }) => {
   const { topics } = useContext(TopicsContext);
 
   const initialTopic = topics[0] ?? null;
+  const initialTimeLimitSec = clampTimeLimitSeconds(initialTopic);
 
   const [questions, setQuestions] = useState(initialTopic?.questions ?? []);
   const [topic, setTopic] = useState(initialTopic);
+  const [timeLimitSeconds, setTimeLimitSeconds] = useState(initialTimeLimitSec);
 
   const [sessionId, setSessionId] = useState(0);
   const [completedSessionId, setCompletedSessionId] = useState(null);
@@ -112,7 +119,7 @@ const QuizProvider = ({ children }) => {
   const [score, setScore] = useState(0);
   const [errorsCount, setErrorsCount] = useState(0);
 
-  const [timeLeft, setTimeLeft] = useState(QUIZ_DURATION_SECONDS);
+  const [timeLeft, setTimeLeft] = useState(initialTimeLimitSec);
   const [isRunning, setIsRunning] = useState(false);
   const [isQuizFinished, setIsQuizFinished] = useState(false);
   const [isRunRecorded, setIsRunRecorded] = useState(false);
@@ -135,6 +142,8 @@ const QuizProvider = ({ children }) => {
       return;
     }
 
+    const nextTimeLimit = clampTimeLimitSeconds(selectedTopic);
+
     setTopic(selectedTopic);
     const validQuestions = (selectedTopic.questions ?? []).filter(isQuestionValid);
 
@@ -147,7 +156,8 @@ const QuizProvider = ({ children }) => {
 
     setScore(0);
     setErrorsCount(0);
-    setTimeLeft(QUIZ_DURATION_SECONDS);
+    setTimeLimitSeconds(nextTimeLimit);
+    setTimeLeft(nextTimeLimit);
 
     setIsRunning(false);
     setIsQuizFinished(false);
@@ -186,9 +196,15 @@ const QuizProvider = ({ children }) => {
       const validQuestions = (updatedTopic.questions ?? []).filter(isQuestionValid);
       setTopic(updatedTopic);
       setQuestions(validQuestions);
-      setColumns(createColumns(validQuestions));
+
+      if (!wasStarted) {
+        const nextTimeLimit = clampTimeLimitSeconds(updatedTopic);
+        setTimeLimitSeconds(nextTimeLimit);
+        setTimeLeft(nextTimeLimit);
+        setColumns(createColumns(validQuestions));
+      }
     }
-  }, [topic, topics]);
+  }, [topic, topics, wasStarted]);
 
   useEffect(() => {
     const activeTopic = topics.find((item) => item.id === topic?.id) ?? topic ?? topics[0];
@@ -201,10 +217,9 @@ const QuizProvider = ({ children }) => {
 
   // старт: первый рандом + включаем таймер
   const startQuiz = useCallback(() => {
-    const activeTopic = topics.find((item) => item.id === topic?.id) ?? topic ?? topics[0];
-    const validQuestions = (activeTopic?.questions ?? []).filter(isQuestionValid);
+    const validQuestions = questions.filter(isQuestionValid);
 
-    if (validQuestions.length < MIN_PAIRS) {
+    if (validQuestions.length < MIN_PAIRS || leftItems.length === 0 || rightItems.length === 0) {
       setStartError(`Недостаточно вопросов для старта: нужно минимум ${MIN_PAIRS}.`);
       setIsRunning(false);
       setCountdown(null);
@@ -213,38 +228,31 @@ const QuizProvider = ({ children }) => {
     }
 
     setStartError(null);
-    setQuestions(validQuestions);
-    const nextColumns = createColumns(validQuestions);
-    setColumns(nextColumns);
-
     setIsRunning(true);
 
     setCurrentPrompt((prevPrompt) => {
       const prevPairId = prevPrompt ? prevPrompt.pairId : null;
-      return pickRandomPrompt(nextColumns, prevPairId);
+      return pickRandomPrompt(columns, prevPairId);
     });
-  }, [topic, topics]);
+  }, [columns, leftItems.length, questions, rightItems.length]);
 
   const startCountdown = useCallback(() => {
     if (wasStarted || countdown !== null || isQuizFinished) {
       return;
     }
 
-    const activeTopic = topics.find((item) => item.id === topic?.id) ?? topic ?? topics[0];
-    const validQuestions = (activeTopic?.questions ?? []).filter(isQuestionValid);
+    const validQuestions = questions.filter(isQuestionValid);
 
-    if (!activeTopic || validQuestions.length < MIN_PAIRS) {
+    if (!topic || validQuestions.length < MIN_PAIRS) {
       setStartError(`Недостаточно вопросов для старта: минимум ${MIN_PAIRS}.`);
       return;
     }
 
     setStartError(null);
-    setTopic(activeTopic);
-    setQuestions(validQuestions);
-    setColumns(createColumns(validQuestions));
+    setTimeLeft(timeLimitSeconds);
     setWasStarted(true);
     setCountdown(3);
-  }, [countdown, isQuizFinished, topic, topics, wasStarted]);
+  }, [countdown, isQuizFinished, questions, timeLimitSeconds, topic, wasStarted]);
 
   const resetCounters = useCallback(() => {
     setScore(0);
@@ -373,7 +381,7 @@ const QuizProvider = ({ children }) => {
 
     setIsRunRecorded(true);
 
-    const durationSec = QUIZ_DURATION_SECONDS - timeLeft;
+    const durationSec = Math.max(0, timeLimitSeconds - timeLeft);
 
     addQuizAttempt({
       date: new Date().toISOString(),
@@ -393,6 +401,7 @@ const QuizProvider = ({ children }) => {
     userName,
     score,
     errorsCount,
+    timeLimitSeconds,
     timeLeft,
     bestStreak,
     topic,

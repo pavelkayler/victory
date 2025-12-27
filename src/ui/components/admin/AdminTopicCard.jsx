@@ -11,6 +11,9 @@ const AdminTopicCard = ({ topic, onEdit }) => {
       <div className="admin-topic-row__meta">
         <div className="admin-topic-row__top">
           <div className="admin-topic-row__title fw-semibold text-break">{topic.title}</div>
+          <div className="admin-topic-row__time text-center fw-semibold">
+            {topic.timeLimitMin ?? 5} минут
+          </div>
           <Badge bg="light" text="dark" className="admin-topic-row__count fw-semibold">
             {questionsLabel}
           </Badge>

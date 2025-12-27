@@ -1,4 +1,6 @@
-import { Button, CardSubtitle, CardTitle } from "react-bootstrap";
+import Button from "react-bootstrap/Button";
+import CardSubtitle from "react-bootstrap/CardSubtitle";
+import CardTitle from "react-bootstrap/CardTitle";
 
 const AdminHeader = ({ onLogout }) => {
   return (
