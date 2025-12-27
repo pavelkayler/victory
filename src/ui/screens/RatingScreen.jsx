@@ -1,6 +1,10 @@
 import { useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
-import { Card, CardBody, CardTitle, Container, Table } from "react-bootstrap";
+import Card from "react-bootstrap/Card";
+import CardBody from "react-bootstrap/CardBody";
+import CardTitle from "react-bootstrap/CardTitle";
+import Container from "react-bootstrap/Container";
+import Table from "react-bootstrap/Table";
 
 import { HistoryContext, TopicsContext } from "../../core/context/Context.jsx";
 import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
@@ -22,6 +26,25 @@ const formatDuration = (seconds = 0) => {
   const restSeconds = safeSeconds % 60;
 
   return `${String(minutes).padStart(2, "0")}:${String(restSeconds).padStart(2, "0")}`;
+};
+
+const RatingCard = ({ attempt }) => {
+  return (
+    <div className="rating-card">
+      <div className="rating-card__row">
+        <span className="rating-card__place">#{attempt.place}</span>
+        <span className="rating-card__user text-truncate">{attempt.userName}</span>
+      </div>
+      <div className="rating-card__row rating-card__row--stats">
+        <span className="rating-card__correct text-success">Верно: {attempt.correct}</span>
+        <span className="rating-card__wrong text-danger">Ошибок: {attempt.wrong}</span>
+      </div>
+      <div className="rating-card__row rating-card__row--meta">
+        <span className="rating-card__time">Время: {formatDuration(attempt.durationSec)}</span>
+        <span className="rating-card__date text-muted">{formatDate(attempt.date)}</span>
+      </div>
+    </div>
+  );
 };
 
 const RatingScreen = () => {
@@ -96,32 +119,40 @@ const RatingScreen = () => {
             {rows.length === 0 ? (
               <div className="text-muted">Результатов пока нет.</div>
             ) : (
-              <div className="table-responsive">
-                <Table hover className="align-middle mb-0">
-                  <thead>
-                    <tr>
-                      <th style={{ width: "80px" }}>Место</th>
-                      <th>Пользователь</th>
-                      <th>Верно</th>
-                      <th>Ошибок</th>
-                      <th>Время</th>
-                      <th>Дата</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {rows.map((attempt) => (
-                      <tr key={attempt.id}>
-                        <td className="fw-semibold">{attempt.place}</td>
-                        <td>{attempt.userName}</td>
-                        <td className="text-success fw-semibold">{attempt.correct}</td>
-                        <td className="text-danger fw-semibold">{attempt.wrong}</td>
-                        <td>{formatDuration(attempt.durationSec)}</td>
-                        <td>{formatDate(attempt.date)}</td>
+              <>
+                <div className="table-responsive d-none d-md-block">
+                  <Table hover className="align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th style={{ width: "80px" }}>Место</th>
+                        <th>Пользователь</th>
+                        <th>Верно</th>
+                        <th>Ошибок</th>
+                        <th>Время</th>
+                        <th>Дата</th>
                       </tr>
-                    ))}
-                  </tbody>
-                </Table>
-              </div>
+                    </thead>
+                    <tbody>
+                      {rows.map((attempt) => (
+                        <tr key={attempt.id}>
+                          <td className="fw-semibold">{attempt.place}</td>
+                          <td>{attempt.userName}</td>
+                          <td className="text-success fw-semibold">{attempt.correct}</td>
+                          <td className="text-danger fw-semibold">{attempt.wrong}</td>
+                          <td>{formatDuration(attempt.durationSec)}</td>
+                          <td>{formatDate(attempt.date)}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </Table>
+                </div>
+
+                <div className="d-md-none rating-card-list">
+                  {rows.map((attempt) => (
+                    <RatingCard key={attempt.id} attempt={attempt} />
+                  ))}
+                </div>
+              </>
             )}
           </CardBody>
         </Card>

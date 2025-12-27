@@ -1,6 +1,22 @@
-import { Button, Card, CardBody, CardTitle, Form, FormControl, FormGroup, FormLabel } from "react-bootstrap";
+import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import CardBody from "react-bootstrap/CardBody";
+import CardTitle from "react-bootstrap/CardTitle";
+import Form from "react-bootstrap/Form";
+import FormControl from "react-bootstrap/FormControl";
+import FormGroup from "react-bootstrap/FormGroup";
+import FormLabel from "react-bootstrap/FormLabel";
 
-const AdminAddTopicForm = ({ topicTitle, topicDescription, onChangeTitle, onChangeDescription, onSubmit, topicError }) => {
+const AdminAddTopicForm = ({
+  topicTitle,
+  topicDescription,
+  timeLimit,
+  onChangeTitle,
+  onChangeDescription,
+  onChangeTimeLimit,
+  onSubmit,
+  topicError,
+}) => {
   return (
     <Card className="border-0 bg-light-subtle admin-form-card">
       <CardBody>
@@ -25,6 +41,18 @@ const AdminAddTopicForm = ({ topicTitle, topicDescription, onChangeTitle, onChan
               value={topicDescription}
               onChange={(event) => onChangeDescription(event.target.value)}
               placeholder="Кратко о теме"
+            />
+          </FormGroup>
+
+          <FormGroup controlId="topicTimeLimit" className="mb-3">
+            <FormLabel>Время (минуты)</FormLabel>
+            <FormControl
+              type="number"
+              min={1}
+              max={60}
+              value={timeLimit}
+              onChange={(event) => onChangeTimeLimit(event.target.value)}
+              placeholder="5"
             />
           </FormGroup>
 

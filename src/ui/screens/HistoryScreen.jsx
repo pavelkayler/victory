@@ -1,5 +1,8 @@
 import { useContext, useMemo, useState } from "react";
-import { Card, CardBody, CardTitle, Container } from "react-bootstrap";
+import Card from "react-bootstrap/Card";
+import CardBody from "react-bootstrap/CardBody";
+import CardTitle from "react-bootstrap/CardTitle";
+import Container from "react-bootstrap/Container";
 
 import {
   HistoryContext,

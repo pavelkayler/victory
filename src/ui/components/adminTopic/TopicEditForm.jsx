@@ -1,4 +1,7 @@
-import { FormControl, FormGroup, FormLabel, Row } from "react-bootstrap";
+import FormControl from "react-bootstrap/FormControl";
+import FormGroup from "react-bootstrap/FormGroup";
+import FormLabel from "react-bootstrap/FormLabel";
+import Row from "react-bootstrap/Row";
 
 const TopicEditForm = ({
   titleDraft,

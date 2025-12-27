@@ -32,24 +32,26 @@ const UserHeader = ({
           </div>
           <div className="user-header-desktop-center">
             {showUserRow && (
-              <Stack
-                direction="horizontal"
-                gap={2}
-                className="user-header-bar flex-nowrap justify-content-center"
-              >
-                <i className="bi bi-person-circle text-primary" aria-hidden="true" />
-                <span className="fw-semibold user-name user-name--desktop text-truncate" title={displayName}>
-                  {displayName}
-                </span>
-                <Button
-                  variant="outline-danger"
-                  type="button"
-                  className="user-logout-btn"
-                  onClick={onLogout}
+              <div className="user-header-user-block">
+                <Stack
+                  direction="horizontal"
+                  gap={2}
+                  className="user-header-bar flex-nowrap justify-content-center"
                 >
-                  Выйти
-                </Button>
-              </Stack>
+                  <i className="bi bi-person-circle text-primary" aria-hidden="true" />
+                  <span className="fw-semibold user-name user-name--desktop text-truncate" title={displayName}>
+                    {displayName}
+                  </span>
+                  <Button
+                    variant="outline-danger"
+                    type="button"
+                    className="user-logout-btn"
+                    onClick={onLogout}
+                  >
+                    Выйти
+                  </Button>
+                </Stack>
+              </div>
             )}
           </div>
           <div className="user-header-desktop-right">
