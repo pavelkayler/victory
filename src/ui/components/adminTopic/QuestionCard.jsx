@@ -67,26 +67,6 @@ const QuestionCard = ({
               </Badge>
             )}
           </div>
-          {!isEditing && (
-            <div className="admin-question-card__actions">
-              <Button
-                size="sm"
-                variant="outline-primary"
-                type="button"
-                onClick={onEdit}
-              >
-                Редактировать
-              </Button>
-              <Button
-                size="sm"
-                variant="outline-danger"
-                type="button"
-                onClick={onDelete}
-              >
-                Удалить
-              </Button>
-            </div>
-          )}
         </div>
 
         <Row className="g-3">
@@ -140,8 +120,29 @@ const QuestionCard = ({
           </Col>
         </Row>
 
+        {!isEditing && (
+          <div className="question-actions-row d-flex align-items-center justify-content-between gap-2 mt-3 mb-2">
+            <Button
+              size="sm"
+              variant="outline-primary"
+              type="button"
+              onClick={onEdit}
+            >
+              Редактировать
+            </Button>
+            <Button
+              size="sm"
+              variant="outline-danger"
+              type="button"
+              onClick={onDelete}
+            >
+              Удалить
+            </Button>
+          </div>
+        )}
+
         {isEditing && (
-          <div className="question-edit-actions d-flex flex-wrap gap-2 justify-content-between mt-3 mb-2 w-100">
+          <div className="question-edit-actions d-flex align-items-center justify-content-between gap-2 flex-wrap mt-3 mb-2 w-100">
             <Button
               variant="success"
               type="button"

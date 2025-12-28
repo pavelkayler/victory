@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/set-state-in-effect */
 import { useContext, useEffect, useMemo, useState } from "react";
-import { Link, useLocation, useParams } from "react-router-dom";
+import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import CardBody from "react-bootstrap/CardBody";
@@ -32,7 +32,8 @@ const SORT_MODES = {
 
 const AdminTopicScreen = () => {
   const { topicId } = useParams();
-  const { getTopicById, updateQuestion, addQuestion, deleteQuestion, updateTopic } =
+  const navigate = useNavigate();
+  const { getTopicById, updateQuestion, addQuestion, deleteQuestion, updateTopic, deleteTopic } =
     useContext(TopicsContext);
   const location = useLocation();
   const isAllowed = useAdminGuard();
@@ -55,6 +56,7 @@ const AdminTopicScreen = () => {
   });
   const [pendingDeleteId, setPendingDeleteId] = useState(null);
   const [draftQuestion, setDraftQuestion] = useState(null);
+  const [isDeleteTopicModalOpen, setIsDeleteTopicModalOpen] = useState(false);
 
   useEffect(() => {
     if (!topic) {
@@ -331,6 +333,24 @@ const AdminTopicScreen = () => {
     setLastCreatedId(null);
   };
 
+  const handleDeleteTopic = () => {
+    setIsDeleteTopicModalOpen(true);
+  };
+
+  const handleConfirmDeleteTopic = () => {
+    if (!topic) {
+      setIsDeleteTopicModalOpen(false);
+      return;
+    }
+
+    deleteTopic(topic.id);
+    setIsDeleteTopicModalOpen(false);
+    navigate(ADMIN_PATH, {
+      replace: true,
+      state: { toastMessage: "Тема удалена" },
+    });
+  };
+
   if (!isAllowed) {
     return null;
   }
@@ -394,17 +414,17 @@ const AdminTopicScreen = () => {
               <TopicHero topic={topic} questionsCount={questions.length} />
             )}
 
-              <TopicActionsRow
-                isEditingTopic={isEditingTopicMeta}
-                onEditTopic={handleStartEditTopicMeta}
-                onAddQuestion={handleAddQuestion}
-                onCancelEdit={handleCancelTopicMeta}
-                onSaveTopic={handleSaveTopicMeta}
-                isSaveDisabled={!topicTitleDraft.trim() || !isTimeLimitValid}
-                isTimeLimitValid={isTimeLimitValid}
-                timeLimit={topicTimeLimitDraft}
-                onChangeTimeLimit={setTopicTimeLimitDraft}
-              />
+            <TopicActionsRow
+              isEditingTopic={isEditingTopicMeta}
+              onEditTopic={handleStartEditTopicMeta}
+              onAddQuestion={handleAddQuestion}
+              onCancelEdit={handleCancelTopicMeta}
+              onSaveTopic={handleSaveTopicMeta}
+              isSaveDisabled={!topicTitleDraft.trim() || !isTimeLimitValid}
+              isTimeLimitValid={isTimeLimitValid}
+              timeLimit={topicTimeLimitDraft}
+              onChangeTimeLimit={setTopicTimeLimitDraft}
+            />
 
             <QuestionsList
               questions={displayedQuestions}
@@ -418,6 +438,12 @@ const AdminTopicScreen = () => {
               onSave={handleSaveQuestion}
               onCancel={handleCancelEdit}
             />
+
+            <div className="admin-delete-topic-row d-flex justify-content-center mt-4">
+              <Button variant="outline-danger" type="button" onClick={handleDeleteTopic}>
+                Удалить тему
+              </Button>
+            </div>
           </CardBody>
         </Card>
       </div>
@@ -430,6 +456,16 @@ const AdminTopicScreen = () => {
         cancelText="Отмена"
         onConfirm={handleConfirmDelete}
         onCancel={() => setPendingDeleteId(null)}
+      />
+
+      <ConfirmModal
+        show={isDeleteTopicModalOpen}
+        title="Удалить тему?"
+        body="Действие нельзя отменить. Продолжить?"
+        confirmText="Удалить"
+        cancelText="Отмена"
+        onConfirm={handleConfirmDeleteTopic}
+        onCancel={() => setIsDeleteTopicModalOpen(false)}
       />
 
       <AppToast

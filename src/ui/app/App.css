@@ -1124,13 +1124,29 @@ h5 {
     justify-content: center;
 }
 
-.quiz-top-bar__side {
+.quizbar__timer {
     display: flex;
     align-items: center;
+    justify-content: flex-start;
+    flex: 0 0 auto;
+}
+
+.quizbar__stats {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.quizbar__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex: 0 0 auto;
     transition: opacity 0.25s ease;
 }
 
-.quiz-top-bar.is-scrolled .quiz-top-bar__side {
+.quiz-top-bar.is-scrolled .quizbar__actions {
     opacity: 0;
     pointer-events: none;
 }
@@ -1516,9 +1532,18 @@ h5 {
 
 .admin-topic-list-header__actions {
     display: inline-flex;
-    align-items: center;
+    align-items: flex-end;
     gap: 0.5rem;
     flex-shrink: 0;
+}
+
+.admin-topic-list-header__item {
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    min-width: 0;
 }
 
 .admin-topic-list-header__btn {
@@ -1530,6 +1555,38 @@ h5 {
     align-items: center;
     justify-content: center;
     border-radius: 12px;
+}
+
+.admin-topic-list-header__hint {
+    font-size: 0.68rem;
+    color: #6b7280;
+    letter-spacing: 0.02em;
+    line-height: 1.1;
+    white-space: nowrap;
+}
+
+.import-modal__file {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.import-file-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.import-file-name {
+    padding: 0.55rem 0.7rem;
+    background: #f8fafc;
+    border-radius: 10px;
+    border: 1px solid #e2e8f0;
+    font-size: 0.95rem;
+    max-width: 100%;
+    word-break: break-word;
 }
 
 .admin-exit-btn {
@@ -1693,10 +1750,23 @@ h5 {
     font-size: 0.95rem;
 }
 
+.question-actions-row {
+    width: 100%;
+    margin-top: 0.75rem;
+    margin-bottom: 0.45rem;
+}
+
+.question-actions-row .btn {
+    width: auto;
+    min-width: 0;
+}
+
 .question-edit-actions {
     width: 100%;
     justify-content: space-between;
     row-gap: 0.75rem;
+    margin-top: 0.75rem;
+    margin-bottom: 0.45rem;
 }
 
 .question-edit-actions .btn {
@@ -1772,6 +1842,7 @@ h5 {
     gap: 0.75rem;
     flex-wrap: wrap;
     width: 100%;
+    padding-inline: 0;
 }
 
 .admin-topic-actions-buttons .btn {
@@ -1782,10 +1853,15 @@ h5 {
 .admin-topic-row-4 {
     justify-content: center;
     align-items: center;
+    --bs-gutter-x: 0;
 }
 
 .admin-add-question-btn {
     margin-bottom: 0.35rem;
+}
+.admin-delete-topic-row {
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
 }
 .history-attempts-section {
     padding-top: 0.5rem;
