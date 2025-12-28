@@ -1,5 +1,13 @@
 import { useEffect, useRef } from "react";
-import { Badge, Button, Card, CardBody, Col, FormControl, FormGroup, FormLabel, Row } from "react-bootstrap";
+import Badge from "react-bootstrap/Badge";
+import Button from "react-bootstrap/Button";
+import Card from "react-bootstrap/Card";
+import CardBody from "react-bootstrap/CardBody";
+import Col from "react-bootstrap/Col";
+import FormControl from "react-bootstrap/FormControl";
+import FormGroup from "react-bootstrap/FormGroup";
+import FormLabel from "react-bootstrap/FormLabel";
+import Row from "react-bootstrap/Row";
 
 const QuestionCard = ({
   question,
@@ -48,8 +56,8 @@ const QuestionCard = ({
       className={`admin-question-card ${isHighlighted ? "is-highlighted" : ""}`.trim()}
     >
       <CardBody>
-        <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2 admin-question-card__header">
-          <div className="d-flex align-items-center gap-2 flex-wrap">
+        <div className="admin-question-card__header">
+          <div className="admin-question-card__meta d-flex align-items-center gap-2 flex-wrap">
             <span className="fw-semibold">
               {isDraft ? "Новый" : `№${id.toString().padStart(2, "0")}`}
             </span>
@@ -60,7 +68,7 @@ const QuestionCard = ({
             )}
           </div>
           {!isEditing && (
-            <div className="d-flex flex-wrap gap-2">
+            <div className="admin-question-card__actions">
               <Button
                 size="sm"
                 variant="outline-primary"
@@ -133,7 +141,7 @@ const QuestionCard = ({
         </Row>
 
         {isEditing && (
-          <div className="d-flex flex-wrap gap-2 justify-content-center mt-3 question-edit-actions">
+          <div className="question-edit-actions d-flex flex-wrap gap-2 justify-content-between mt-3 mb-2 w-100">
             <Button
               variant="success"
               type="button"

@@ -1,6 +1,6 @@
 // src/ui/components/quiz/header/QuizHeader.jsx
 import { useContext } from "react";
-import { Button } from "react-bootstrap";
+import Button from "react-bootstrap/Button";
 
 import { QuizContext } from "../../../../core/context/Context.jsx";
 
