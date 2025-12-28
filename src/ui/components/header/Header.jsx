@@ -1,9 +1,9 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useLocation } from "react-router-dom";
 
 import { AdminContext, QuizContext, UserContext } from "../../../core/context/Context.jsx";
 import { ADMIN_PATH } from "../../../core/constants/paths.js";
-import { QuizOverlayBar, QuizTopBar } from "../quiz/header/QuizTopBar.jsx";
+import { QuizTopBar } from "../quiz/header/QuizTopBar.jsx";
 import { HeaderShell } from "./HeaderShell.jsx";
 import { UserHeader } from "./UserHeader.jsx";
 
@@ -22,8 +22,9 @@ const Header = () => {
     score,
     errorsCount,
   } = useContext(QuizContext);
-  const topBarRef = useRef(null);
-  const [isTopBarVisible, setIsTopBarVisible] = useState(true);
+  const [isQuizScrolled, setIsQuizScrolled] = useState(
+    () => (typeof window !== "undefined" ? window.scrollY > 12 : false),
+  );
 
   const isQuizPage = location.pathname === "/quiz";
   const isHistoryPage = location.pathname === "/history";
@@ -48,27 +49,20 @@ const Header = () => {
   const displayName = userName?.trim() || "Пользователь";
   const showQuizControls = isQuizPage && wasStarted && !isQuizFinished;
   const isCounting = countdownText !== null;
-  const showOverlayBar = showQuizControls && isRunning && !isTopBarVisible;
   const showUserRow = Boolean(displayName);
 
   useEffect(() => {
     if (!showQuizControls) {
-      return;
+      return undefined;
     }
 
-    const observed = topBarRef.current;
-    if (!observed || typeof IntersectionObserver === "undefined") {
-      return;
-    }
+    const handleScroll = () => {
+      setIsQuizScrolled(window.scrollY > 12);
+    };
 
-    const observer = new IntersectionObserver(
-      ([entry]) => setIsTopBarVisible(entry.isIntersecting),
-      { threshold: 0.01 },
-    );
+    window.addEventListener("scroll", handleScroll, { passive: true });
 
-    observer.observe(observed);
-
-    return () => observer.disconnect();
+    return () => window.removeEventListener("scroll", handleScroll);
   }, [showQuizControls]);
 
   if (!isAuth || isAdminAuthed || isAdminPage) {
@@ -77,29 +71,19 @@ const Header = () => {
 
   if (showQuizControls) {
     return (
-      <>
-        <HeaderShell>
-          <div ref={topBarRef}>
-            <QuizTopBar
-              timerText={isCounting ? countdownText ?? timerText : timerText}
-              isCounting={isCounting}
-              score={score}
-              errorsCount={errorsCount}
-              onFinish={finishQuiz}
-              isRunning={isRunning}
-            />
-          </div>
-        </HeaderShell>
-
-        {showOverlayBar && (
-          <QuizOverlayBar
-            timerText={timerText}
+      <HeaderShell className="quiz-top-bar-shell">
+        <div className="quiz-top-bar-wrapper">
+          <QuizTopBar
+            timerText={isCounting ? countdownText ?? timerText : timerText}
             isCounting={isCounting}
             score={score}
             errorsCount={errorsCount}
+            onFinish={finishQuiz}
+            isRunning={isRunning}
+            isScrolled={showQuizControls && isQuizScrolled}
           />
-        )}
-      </>
+        </div>
+      </HeaderShell>
     );
   }
 

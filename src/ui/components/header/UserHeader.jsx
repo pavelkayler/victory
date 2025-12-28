@@ -16,7 +16,7 @@ const UserHeader = ({
 }) => {
   return (
     <HeaderShell>
-      <Container fluid className="p-0">
+      <Container fluid className="p-0 w-100 user-header-container">
         <div className="user-header-desktop-grid d-none d-md-grid">
           <div className="user-header-desktop-left">
             <Button
@@ -67,7 +67,7 @@ const UserHeader = ({
           </div>
         </div>
 
-        <Row className="gy-2 align-items-center d-flex d-md-none">
+        <Row className="gy-2 align-items-center d-flex d-md-none user-header-mobile-wrapper">
           <Col xs={12}>
             <div className="user-header-mobile-actions">
               <Button

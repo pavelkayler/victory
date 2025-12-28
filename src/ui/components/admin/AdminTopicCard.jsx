@@ -11,12 +11,14 @@ const AdminTopicCard = ({ topic, onEdit }) => {
       <div className="admin-topic-row__meta">
         <div className="admin-topic-row__top">
           <div className="admin-topic-row__title fw-semibold text-break">{topic.title}</div>
-          <div className="admin-topic-row__time text-center fw-semibold">
-            {topic.timeLimitMin ?? 5} минут
+          <div className="admin-topic-row__badges">
+            <Badge bg="light" text="dark" className="fw-semibold admin-topic-badge admin-topic-badge--time">
+              {topic.timeLimitMin ?? 5} минут
+            </Badge>
+            <Badge bg="light" text="dark" className="fw-semibold admin-topic-badge">
+              {questionsLabel}
+            </Badge>
           </div>
-          <Badge bg="light" text="dark" className="admin-topic-row__count fw-semibold">
-            {questionsLabel}
-          </Badge>
         </div>
         <div className="text-muted small text-break admin-topic-row__desc">{topic.description}</div>
       </div>
