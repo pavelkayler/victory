@@ -358,18 +358,19 @@ const AdminTopicScreen = () => {
   return (
     <Container fluid className="page-section">
       <div className="page-wrap">
-        <Row className="mb-3 align-items-center">
+        <Row className="mb-3 align-items-center admin-topic-toolbar">
           <Col>
             <Button as={Link} to={ADMIN_PATH} variant="outline-primary" size="sm" className="admin-back-btn">
               <i className="bi bi-arrow-left-short me-2" aria-hidden="true" />
               К списку тем
             </Button>
           </Col>
-          <Col xs="auto">
+          <Col xs={12} md="auto" className="admin-sort-select-col">
             <FormSelect
               size="sm"
               value={sortMode}
               onChange={handleSortChange}
+              className="admin-sort-select"
             >
               <option value={SORT_MODES.created}>По порядку создания</option>
               <option value={SORT_MODES.leftAsc}>А→Я по левой колонке</option>

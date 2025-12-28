@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import { Badge, Button, Card, CardBody, Col, FormControl, FormGroup, FormLabel, Row } from "react-bootstrap";
 
 const QuestionCard = ({
@@ -16,13 +17,38 @@ const QuestionCard = ({
 }) => {
   const { id } = question;
   const isDraft = id === "draft";
+  const leftRef = useRef(null);
+  const rightRef = useRef(null);
+
+  const autoResize = (element) => {
+    if (!element) {
+      return;
+    }
+    element.style.height = "auto";
+    element.style.overflow = "hidden";
+    element.style.height = `${element.scrollHeight}px`;
+  };
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+    autoResize(leftRef.current);
+  }, [draft.left, isEditing]);
+
+  useEffect(() => {
+    if (!isEditing) {
+      return;
+    }
+    autoResize(rightRef.current);
+  }, [draft.right, isEditing]);
 
   return (
     <Card
       className={`admin-question-card ${isHighlighted ? "is-highlighted" : ""}`.trim()}
     >
       <CardBody>
-        <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <div className="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2 admin-question-card__header">
           <div className="d-flex align-items-center gap-2 flex-wrap">
             <span className="fw-semibold">
               {isDraft ? "Новый" : `№${id.toString().padStart(2, "0")}`}
@@ -64,10 +90,12 @@ const QuestionCard = ({
                   <FormControl
                     as="textarea"
                     rows={2}
+                    ref={leftRef}
                     value={draft.left}
                     placeholder="Фраза или вопрос"
                     onChange={(event) => onChange("left", event.target.value)}
                     isInvalid={Boolean(leftError)}
+                    className="auto-resize-textarea"
                   />
                   {leftError && (
                     <div className="text-danger small mt-1">{leftError}</div>
@@ -86,10 +114,12 @@ const QuestionCard = ({
                   <FormControl
                     as="textarea"
                     rows={2}
+                    ref={rightRef}
                     value={draft.right}
                     placeholder="Ответ или соответствие"
                     onChange={(event) => onChange("right", event.target.value)}
                     isInvalid={Boolean(rightError)}
+                    className="auto-resize-textarea"
                   />
                   {rightError && (
                     <div className="text-danger small mt-1">{rightError}</div>
@@ -103,7 +133,7 @@ const QuestionCard = ({
         </Row>
 
         {isEditing && (
-          <div className="d-flex flex-wrap gap-2 justify-content-end mt-3">
+          <div className="d-flex flex-wrap gap-2 justify-content-center mt-3 question-edit-actions">
             <Button
               variant="success"
               type="button"

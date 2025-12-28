@@ -15,15 +15,15 @@ const TopicHero = ({ topic, questionsCount }) => {
         <Col xs={12} md className="admin-topic-title-col">
           <CardTitle as="h2" className="fs-3 mb-0">{topic.title}</CardTitle>
         </Col>
-        <Col xs={12} md className="admin-topic-time-col">
-          <div className="admin-topic-time text-center fw-semibold">
-            {topic.timeLimitMin ?? 5} минут
+        <Col xs={12} md className="admin-topic-badge-col">
+          <div className="admin-topic-badges">
+            <Badge bg="light" text="dark" className="fw-semibold admin-topic-badge admin-topic-badge--time">
+              {topic.timeLimitMin ?? 5} минут
+            </Badge>
+            <Badge bg="light" text="dark" className="fw-semibold admin-topic-badge">
+              {badgeText}
+            </Badge>
           </div>
-        </Col>
-        <Col xs="auto" className="admin-topic-badge-col">
-          <Badge bg="light" text="dark" className="fw-semibold admin-topic-count">
-            {badgeText}
-          </Badge>
         </Col>
       </Row>
 

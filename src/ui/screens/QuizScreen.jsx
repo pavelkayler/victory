@@ -69,6 +69,7 @@ const QuizScreen = () => {
   const prevScoreRef = useRef(score);
   const [showCombo, setShowCombo] = useState(false);
   const prevStreakRef = useRef(streak);
+  const [isScrolled, setIsScrolled] = useState(false);
 
   useEffect(() => {
     if (score > prevScoreRef.current) {
@@ -102,10 +103,21 @@ const QuizScreen = () => {
     return undefined;
   }, [streak]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 12);
+    };
+
+    handleScroll();
+    window.addEventListener("scroll", handleScroll, { passive: true });
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const showIntroCard = !wasStarted;
 
   return (
-    <Container fluid className="py-4 px-2 px-md-4 quiz-container">
+    <Container fluid className="py-4 px-2 px-md-4 quiz-container quiz-page">
       <Row>
         <Col xs={12}>
           <Card className="shadow-sm page-card quiz-card">
@@ -113,7 +125,7 @@ const QuizScreen = () => {
               <ScoreBurst visible={showBurst && streak < 3} />
               <ComboBurst streak={streak} visible={showCombo} />
 
-              <div className="quiz-stage">
+              <div className={`quiz-stage ${isScrolled ? "is-scrolled" : ""}`}>
                 <QuizColumns hasStarted={wasStarted} />
 
                 <QuizHeader

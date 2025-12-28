@@ -65,18 +65,20 @@ const TopicsScreen = () => {
                             <i className="bi bi-book-half text-primary" aria-hidden="true" />
                             <span className="text-break">{topic.title}</span>
                           </div>
-                          <div className="topic-card-timer text-center fw-semibold">
-                            {timeLimitText}
+                          <div className="topic-card-meta">
+                            <Badge bg="light" text="dark" className="fw-semibold topic-meta-badge topic-card-timer">
+                              {timeLimitText}
+                            </Badge>
+                            <Badge bg="light" text="dark" className="fw-semibold topic-meta-badge topic-card-count">
+                              {badgeText}
+                            </Badge>
                           </div>
-                          <Badge bg="light" text="dark" className="fw-semibold topic-card-count">
-                            {badgeText}
-                          </Badge>
                         </div>
                       </CardTitle>
                       <CardText className="mb-3 text-muted">
                         {topic.description}
                       </CardText>
-                      <div className="topic-card-actions d-flex flex-wrap gap-2 align-items-center">
+                      <div className="topic-card-actions d-flex gap-2 align-items-center topic-card-actions-row">
                         <Button
                           variant="primary"
                           type="button"
@@ -85,16 +87,15 @@ const TopicsScreen = () => {
                         >
                           Пройти тест
                         </Button>
-                        <div className="ms-auto topic-card-rating">
-                          <Button
-                            variant="outline-secondary"
-                            as={Link}
-                            to={`/rating/${topic.id}`}
-                            type="button"
-                          >
-                            Рейтинг
-                          </Button>
-                        </div>
+                        <Button
+                          variant="outline-secondary"
+                          as={Link}
+                          to={`/rating/${topic.id}`}
+                          type="button"
+                          className="topic-card-rating"
+                        >
+                          Рейтинг
+                        </Button>
                       </div>
                       {!canStart && (
                         <CardText className="text-danger small mt-2 mb-0">
