@@ -32,6 +32,11 @@ const TopicsScreen = () => {
     navigate("/quiz");
   };
 
+  const availableTopics = topics.filter((topic) => {
+    const validCount = topic.questions.filter(isQuestionValid).length;
+    return validCount >= MIN_PAIRS;
+  });
+
   return (
     <Container fluid className="page-section">
       <div className="page-wrap">
@@ -42,14 +47,14 @@ const TopicsScreen = () => {
               Выбор темы
             </CardTitle>
 
-            {topics.length === 0 ? (
+            {availableTopics.length === 0 ? (
               <Card className="border-0 bg-light-subtle mb-0">
                 <CardBody>
-                  <div className="text-muted">Пока нет тем. Добавьте их в админ-кабинете.</div>
+                  <div className="text-muted">Пока нет доступных тем. Добавьте их в админ-кабинете.</div>
                 </CardBody>
               </Card>
             ) : (
-              topics.map((topic) => {
+              availableTopics.map((topic) => {
                 const validCount = topic.questions.filter(isQuestionValid).length;
                 const totalCount = topic.questions.length;
                 const canStart = validCount >= MIN_PAIRS;
@@ -97,11 +102,6 @@ const TopicsScreen = () => {
                           Рейтинг
                         </Button>
                       </div>
-                      {!canStart && (
-                        <CardText className="text-danger small mt-2 mb-0">
-                          Нужно минимум {MIN_PAIRS} заполненных вопросов для старта.
-                        </CardText>
-                      )}
                     </CardBody>
                   </Card>
                 );

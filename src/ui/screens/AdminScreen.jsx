@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useContext, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
@@ -21,9 +21,10 @@ import { AdminAddTopicForm } from "../components/admin/AdminAddTopicForm.jsx";
 
 const AdminScreen = () => {
   const { isAdminAuthed, authorize, logoutAdmin } = useContext(AdminContext);
-  const { topics, addTopic } = useContext(TopicsContext);
+  const { topics, addTopic, replaceTopics } = useContext(TopicsContext);
   const { logout } = useContext(UserContext);
   const navigate = useNavigate();
+  const importInputRef = useRef(null);
 
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -43,6 +44,10 @@ const AdminScreen = () => {
       totalTopics: topics.length,
     };
   }, [topics]);
+
+  const showToast = (message, bg = "success") => {
+    setToastState({ show: true, message, bg });
+  };
 
   const handlePasswordSubmit = (event) => {
     event.preventDefault();
@@ -80,14 +85,129 @@ const AdminScreen = () => {
     navigate(`${ADMIN_PATH}/topics/${topicId}`);
   };
 
+  const clampTimeLimit = (value) => {
+    const parsed = Number(value);
+    if (!Number.isFinite(parsed)) {
+      return 5;
+    }
+
+    return Math.min(60, Math.max(1, parsed));
+  };
+
+  const normalizeImportedTopic = (topic) => {
+    if (!topic || typeof topic !== "object") {
+      throw new Error("Некорректная структура темы.");
+    }
+
+    const topicId = typeof topic.id === "string" ? topic.id : topic.id?.toString();
+    if (!topicId) {
+      throw new Error("У темы отсутствует id.");
+    }
+
+    if (!Array.isArray(topic.questions)) {
+      throw new Error(`У темы "${topic.title || topicId}" отсутствует список вопросов.`);
+    }
+
+    if (typeof topic.title !== "string" || topic.title.trim() === "") {
+      throw new Error(`У темы "${topicId}" отсутствует название.`);
+    }
+
+    if (typeof topic.description !== "string") {
+      throw new Error(`У темы "${topicId}" отсутствует описание.`);
+    }
+
+    const normalizedQuestions = topic.questions
+      .map((question) => {
+        if (!question || typeof question !== "object") {
+          return null;
+        }
+
+        const questionId = Number(question.id);
+        if (!Number.isFinite(questionId)) {
+          return null;
+        }
+
+        return {
+          id: questionId,
+          left: typeof question.left === "string" ? question.left : "",
+          right: typeof question.right === "string" ? question.right : "",
+        };
+      })
+      .filter(Boolean);
+
+    const timeLimitRaw = topic.timeLimitMinutes ?? topic.timeLimitMin ?? topic.timeLimit;
+    const timeLimitMin = clampTimeLimit(timeLimitRaw ?? 5);
+
+    if (timeLimitMin === null) {
+      throw new Error(`Некорректное время у темы "${topic.title || topicId}".`);
+    }
+
+    return {
+      id: topicId,
+      title: topic.title.trim(),
+      description: topic.description,
+      timeLimitMin,
+      questions: normalizedQuestions,
+    };
+  };
+
+  const handleExportTopics = () => {
+    const payload = { topics };
+    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "topics-export.json";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    URL.revokeObjectURL(url);
+    showToast("Экспорт выполнен");
+  };
+
+  const handleImportTopics = async (file) => {
+    if (!file) {
+      return;
+    }
+
+    try {
+      const content = await file.text();
+      const parsed = JSON.parse(content);
+      const rawTopics = Array.isArray(parsed) ? parsed : parsed?.topics;
+
+      if (!Array.isArray(rawTopics)) {
+        throw new Error("Неверный формат файла: нет массива тем.");
+      }
+
+      const normalizedTopics = rawTopics.map((topic) => normalizeImportedTopic(topic));
+
+      if (normalizedTopics.length === 0) {
+        throw new Error("Нет валидных тем для импорта.");
+      }
+
+      replaceTopics(normalizedTopics);
+      showToast("Импорт выполнен");
+    } catch (error) {
+      showToast(error.message || "Не удалось импортировать файл", "danger");
+    }
+  };
+
+  const handleImportChange = async (event) => {
+    const file = event.target.files?.[0];
+    await handleImportTopics(file);
+    if (event.target) {
+      event.target.value = "";
+    }
+  };
+
+  const handleImportClick = () => {
+    importInputRef.current?.click();
+  };
+
   const handleLogoutAdmin = () => {
     logoutAdmin();
     logout();
     navigate("/", { replace: true });
-  };
-
-  const showToast = (message, bg = "success") => {
-    setToastState({ show: true, message, bg });
   };
 
   if (!isAdminAuthed) {
@@ -136,7 +256,18 @@ const AdminScreen = () => {
           <CardBody>
             <AdminHeader onLogout={handleLogoutAdmin} />
 
-            <TopicListHeader total={stats.totalTopics} />
+            <TopicListHeader
+              total={stats.totalTopics}
+              onExportClick={handleExportTopics}
+              onImportClick={handleImportClick}
+            />
+            <FormControl
+              type="file"
+              accept="application/json"
+              ref={importInputRef}
+              className="visually-hidden"
+              onChange={handleImportChange}
+            />
 
             <AdminTopicList topics={topics} onEditTopic={handleEditClick} />
 

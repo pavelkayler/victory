@@ -1,5 +1,5 @@
 import { useContext } from "react";
-import { ListGroupItem } from "react-bootstrap";
+import ListGroupItem from "react-bootstrap/ListGroupItem";
 
 import { QuizContext } from "../../../../core/context/Context.jsx";
 

@@ -12,30 +12,80 @@ const clampTimeLimit = (value) => {
   return Math.min(60, Math.max(1, parsed));
 };
 
+const normalizeQuestion = (question) => {
+  if (!question || typeof question !== "object") {
+    return null;
+  }
+
+  const id = Number(question.id);
+
+  if (!Number.isFinite(id)) {
+    return null;
+  }
+
+  return {
+    id,
+    left: typeof question.left === "string" ? question.left : "",
+    right: typeof question.right === "string" ? question.right : "",
+  };
+};
+
+const normalizeTopic = (topic) => {
+  if (!topic || typeof topic !== "object") {
+    return null;
+  }
+
+  const topicId = typeof topic.id === "string" ? topic.id : topic.id?.toString();
+  if (!topicId) {
+    return null;
+  }
+
+  const timeLimitValue = clampTimeLimit(
+    topic.timeLimitMin ?? topic.timeLimit ?? topic.timeLimitMinutes ?? 5,
+  ) ?? 5;
+
+  const questions = Array.isArray(topic.questions)
+    ? topic.questions.map((question) => normalizeQuestion(question)).filter(Boolean)
+    : [];
+
+  return {
+    ...topic,
+    id: topicId,
+    title: typeof topic.title === "string" ? topic.title : "Новая тема",
+    description: typeof topic.description === "string" ? topic.description : "",
+    timeLimitMin: timeLimitValue,
+    questions,
+  };
+};
+
+const normalizedDefaultTopics = defaultTopics
+  .map((topic) => normalizeTopic(topic))
+  .filter(Boolean);
+
 const readStoredTopics = () => {
   if (typeof localStorage === "undefined") {
-    return defaultTopics;
+    return normalizedDefaultTopics;
   }
 
   try {
     const raw = localStorage.getItem(TOPICS_STORAGE_KEY);
     if (!raw) {
-      return defaultTopics;
+      return normalizedDefaultTopics;
     }
 
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) {
-      return defaultTopics;
+      return normalizedDefaultTopics;
     }
 
-    return parsed.map((topic) => ({
-      ...topic,
-      timeLimitMin: clampTimeLimit(topic?.timeLimitMin ?? 5) ?? 5,
-      questions: Array.isArray(topic?.questions) ? topic.questions : [],
-    }));
+    const normalizedTopics = parsed
+      .map((topic) => normalizeTopic(topic))
+      .filter(Boolean);
+
+    return normalizedTopics.length > 0 ? normalizedTopics : normalizedDefaultTopics;
   } catch (error) {
     console.error("Failed to read topics from storage", error);
-    return defaultTopics;
+    return normalizedDefaultTopics;
   }
 };
 
@@ -205,6 +255,14 @@ const TopicsProvider = ({ children }) => {
     );
   }, []);
 
+  const replaceTopics = useCallback((nextTopics) => {
+    const normalizedTopics = (Array.isArray(nextTopics) ? nextTopics : [])
+      .map((topic) => normalizeTopic(topic))
+      .filter(Boolean);
+
+    setTopics(normalizedTopics);
+  }, []);
+
   const value = useMemo(
     () => ({
       topics,
@@ -214,8 +272,9 @@ const TopicsProvider = ({ children }) => {
       addQuestion,
       updateQuestion,
       deleteQuestion,
+      replaceTopics,
     }),
-    [topics, getTopicById, addTopic, updateTopic, addQuestion, updateQuestion, deleteQuestion],
+    [topics, getTopicById, addTopic, updateTopic, addQuestion, updateQuestion, deleteQuestion, replaceTopics],
   );
 
   return <TopicsContext.Provider value={value}>{children}</TopicsContext.Provider>;
