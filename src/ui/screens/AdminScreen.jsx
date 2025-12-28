@@ -19,6 +19,7 @@ import ModalTitle from "react-bootstrap/ModalTitle";
 
 import { AdminContext, TopicsContext, UserContext } from "../../core/context/Context.jsx";
 import { ADMIN_PATH } from "../../core/constants/paths.js";
+import { generateId, generateQuestionId, makeUniqueTitle } from "../../core/utils/topics.js";
 import { AppToast } from "../components/common/AppToast.jsx";
 import { AdminHeader } from "../components/admin/AdminHeader.jsx";
 import { TopicListHeader } from "../components/admin/TopicListHeader.jsx";
@@ -212,8 +213,23 @@ const AdminScreen = () => {
       if (mode === "replace") {
         replaceTopics(normalizedTopics);
       } else {
-        // При добавлении обновляем темы с совпадающими id и добавляем новые в конец списка.
-        appendTopics(normalizedTopics);
+        const usedTitles = new Set(topics.map((topic) => topic.title));
+        const preparedTopics = normalizedTopics.map((topic) => {
+          const uniqueTitle = makeUniqueTitle(topic.title, usedTitles);
+          const preparedQuestions = topic.questions.map((question) => ({
+            ...question,
+            id: generateQuestionId(),
+          }));
+
+          return {
+            ...topic,
+            id: generateId(),
+            title: uniqueTitle,
+            questions: preparedQuestions,
+          };
+        });
+
+        appendTopics(preparedTopics);
       }
 
       showToast("Импорт выполнен");

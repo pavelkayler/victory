@@ -1,5 +1,6 @@
 import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 import { topics as defaultTopics } from "../data/questions.js";
+import { generateId } from "../utils/topics.js";
 
 const TOPICS_STORAGE_KEY = "quiz-topics";
 
@@ -115,10 +116,7 @@ const TopicsProvider = ({ children }) => {
     const trimmedDescription = description.trim();
     const normalizedTimeLimit = clampTimeLimit(timeLimitMin) ?? 5;
 
-    const id =
-      typeof crypto !== "undefined" && crypto.randomUUID
-        ? crypto.randomUUID()
-        : `topic-${Date.now()}`;
+    const id = generateId();
 
     const newTopic = {
       id,
@@ -268,14 +266,7 @@ const TopicsProvider = ({ children }) => {
       return;
     }
 
-    setTopics((prev) => {
-      const topicsMap = new Map(prev.map((topic) => [topic.id, topic]));
-      normalizedTopics.forEach((topic) => {
-        topicsMap.set(topic.id, topic);
-      });
-
-      return Array.from(topicsMap.values());
-    });
+    setTopics((prev) => [...prev, ...normalizedTopics]);
   }, []);
 
   const replaceTopics = useCallback((nextTopics) => {
