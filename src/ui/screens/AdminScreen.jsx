@@ -1,5 +1,5 @@
-import { useContext, useMemo, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
 import CardBody from "react-bootstrap/CardBody";
@@ -10,6 +10,12 @@ import Form from "react-bootstrap/Form";
 import FormControl from "react-bootstrap/FormControl";
 import FormGroup from "react-bootstrap/FormGroup";
 import FormLabel from "react-bootstrap/FormLabel";
+import FormSelect from "react-bootstrap/FormSelect";
+import Modal from "react-bootstrap/Modal";
+import ModalBody from "react-bootstrap/ModalBody";
+import ModalFooter from "react-bootstrap/ModalFooter";
+import ModalHeader from "react-bootstrap/ModalHeader";
+import ModalTitle from "react-bootstrap/ModalTitle";
 
 import { AdminContext, TopicsContext, UserContext } from "../../core/context/Context.jsx";
 import { ADMIN_PATH } from "../../core/constants/paths.js";
@@ -21,9 +27,10 @@ import { AdminAddTopicForm } from "../components/admin/AdminAddTopicForm.jsx";
 
 const AdminScreen = () => {
   const { isAdminAuthed, authorize, logoutAdmin } = useContext(AdminContext);
-  const { topics, addTopic, replaceTopics } = useContext(TopicsContext);
+  const { topics, addTopic, replaceTopics, appendTopics } = useContext(TopicsContext);
   const { logout } = useContext(UserContext);
   const navigate = useNavigate();
+  const location = useLocation();
   const importInputRef = useRef(null);
 
   const [password, setPassword] = useState("");
@@ -38,6 +45,10 @@ const AdminScreen = () => {
     message: "",
     bg: "success",
   });
+  const [isImportModalOpen, setIsImportModalOpen] = useState(false);
+  const [importMode, setImportMode] = useState("append");
+  const [selectedImportFile, setSelectedImportFile] = useState(null);
+  const [importError, setImportError] = useState("");
 
   const stats = useMemo(() => {
     return {
@@ -48,6 +59,17 @@ const AdminScreen = () => {
   const showToast = (message, bg = "success") => {
     setToastState({ show: true, message, bg });
   };
+
+  useEffect(() => {
+    if (location.state?.toastMessage) {
+      setToastState({
+        show: true,
+        message: location.state.toastMessage,
+        bg: location.state.toastBg ?? "success",
+      });
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location, navigate]);
 
   const handlePasswordSubmit = (event) => {
     event.preventDefault();
@@ -165,11 +187,13 @@ const AdminScreen = () => {
     showToast("Экспорт выполнен");
   };
 
-  const handleImportTopics = async (file) => {
+  const handleImportTopics = async (file, mode) => {
     if (!file) {
+      setImportError("Выберите файл для импорта.");
       return;
     }
 
+    setImportError("");
     try {
       const content = await file.text();
       const parsed = JSON.parse(content);
@@ -179,29 +203,72 @@ const AdminScreen = () => {
         throw new Error("Неверный формат файла: нет массива тем.");
       }
 
-      const normalizedTopics = rawTopics.map((topic) => normalizeImportedTopic(topic));
+      const normalizedTopics = rawTopics.map((topic) => normalizeImportedTopic(topic)).filter(Boolean);
 
       if (normalizedTopics.length === 0) {
         throw new Error("Нет валидных тем для импорта.");
       }
 
-      replaceTopics(normalizedTopics);
+      if (mode === "replace") {
+        replaceTopics(normalizedTopics);
+      } else {
+        // При добавлении обновляем темы с совпадающими id и добавляем новые в конец списка.
+        appendTopics(normalizedTopics);
+      }
+
       showToast("Импорт выполнен");
+      handleCloseImportModal();
     } catch (error) {
-      showToast(error.message || "Не удалось импортировать файл", "danger");
+      const message = error.message || "Не удалось импортировать файл";
+      setImportError(message);
+      showToast(message, "danger");
+    } finally {
+      if (importInputRef.current) {
+        importInputRef.current.value = "";
+      }
     }
   };
 
-  const handleImportChange = async (event) => {
+  const handleImportChange = (event) => {
     const file = event.target.files?.[0];
-    await handleImportTopics(file);
-    if (event.target) {
-      event.target.value = "";
+    if (!file) {
+      return;
+    }
+
+    setSelectedImportFile(file);
+    setImportError("");
+  };
+
+  const handleFilePickerClick = () => {
+    importInputRef.current?.click();
+  };
+
+  const handleOpenImportModal = () => {
+    setImportError("");
+    setSelectedImportFile(null);
+    setImportMode("append");
+    setIsImportModalOpen(true);
+    if (importInputRef.current) {
+      importInputRef.current.value = "";
     }
   };
 
-  const handleImportClick = () => {
-    importInputRef.current?.click();
+  const handleCloseImportModal = () => {
+    setIsImportModalOpen(false);
+    setImportError("");
+    setSelectedImportFile(null);
+    if (importInputRef.current) {
+      importInputRef.current.value = "";
+    }
+  };
+
+  const handleConfirmImport = async () => {
+    if (!selectedImportFile) {
+      setImportError("Выберите файл для импорта.");
+      return;
+    }
+
+    await handleImportTopics(selectedImportFile, importMode);
   };
 
   const handleLogoutAdmin = () => {
@@ -259,14 +326,7 @@ const AdminScreen = () => {
             <TopicListHeader
               total={stats.totalTopics}
               onExportClick={handleExportTopics}
-              onImportClick={handleImportClick}
-            />
-            <FormControl
-              type="file"
-              accept="application/json"
-              ref={importInputRef}
-              className="visually-hidden"
-              onChange={handleImportChange}
+              onImportClick={handleOpenImportModal}
             />
 
             <AdminTopicList topics={topics} onEditTopic={handleEditClick} />
@@ -284,6 +344,66 @@ const AdminScreen = () => {
           </CardBody>
         </Card>
       </div>
+
+      <FormControl
+        type="file"
+        accept="application/json"
+        ref={importInputRef}
+        className="d-none"
+        onChange={handleImportChange}
+      />
+
+      <Modal show={isImportModalOpen} onHide={handleCloseImportModal} centered>
+        <ModalHeader closeButton>
+          <ModalTitle>Импорт тем</ModalTitle>
+        </ModalHeader>
+        <ModalBody>
+          <div className="import-modal__file text-center">
+            {selectedImportFile ? (
+              <div className="import-file-chip">
+                <span className="import-file-name">{selectedImportFile.name}</span>
+                <Button
+                  variant="outline-secondary"
+                  size="sm"
+                  type="button"
+                  onClick={handleFilePickerClick}
+                >
+                  Сменить файл
+                </Button>
+              </div>
+            ) : (
+              <Button variant="primary" type="button" onClick={handleFilePickerClick}>
+                Загрузить
+              </Button>
+            )}
+          </div>
+
+          <FormGroup controlId="importModeSelect" className="mt-3 mb-0">
+            <FormLabel className="fw-semibold small mb-1">Режим импорта</FormLabel>
+            <FormSelect
+              value={importMode}
+              onChange={(event) => setImportMode(event.target.value)}
+            >
+              <option value="append">Добавить новые темы к имеющимся</option>
+              <option value="replace">Заменить имеющиеся темы новыми</option>
+            </FormSelect>
+          </FormGroup>
+          {importError && <div className="text-danger mt-2 small">{importError}</div>}
+        </ModalBody>
+        <ModalFooter>
+          <Button variant="outline-secondary" type="button" onClick={handleCloseImportModal}>
+            Отмена
+          </Button>
+          <Button
+            variant="primary"
+            type="button"
+            onClick={handleConfirmImport}
+            disabled={!selectedImportFile}
+          >
+            Импортировать
+          </Button>
+        </ModalFooter>
+      </Modal>
 
       <AppToast
         show={toastState.show}

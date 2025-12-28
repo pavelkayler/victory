@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useContext, useMemo } from "react";
 import { useLocation } from "react-router-dom";
 
 import { AdminContext, QuizContext, UserContext } from "../../../core/context/Context.jsx";
@@ -22,9 +22,6 @@ const Header = () => {
     score,
     errorsCount,
   } = useContext(QuizContext);
-  const [isQuizScrolled, setIsQuizScrolled] = useState(
-    () => (typeof window !== "undefined" ? window.scrollY > 12 : false),
-  );
 
   const isQuizPage = location.pathname === "/quiz";
   const isHistoryPage = location.pathname === "/history";
@@ -51,20 +48,6 @@ const Header = () => {
   const isCounting = countdownText !== null;
   const showUserRow = Boolean(displayName);
 
-  useEffect(() => {
-    if (!showQuizControls) {
-      return undefined;
-    }
-
-    const handleScroll = () => {
-      setIsQuizScrolled(window.scrollY > 12);
-    };
-
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [showQuizControls]);
-
   if (!isAuth || isAdminAuthed || isAdminPage) {
     return null;
   }
@@ -80,7 +63,6 @@ const Header = () => {
             errorsCount={errorsCount}
             onFinish={finishQuiz}
             isRunning={isRunning}
-            isScrolled={showQuizControls && isQuizScrolled}
           />
         </div>
       </HeaderShell>

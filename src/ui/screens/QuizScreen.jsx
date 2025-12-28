@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card, CardBody, Col, Container, Row } from "react-bootstrap";
 
@@ -22,8 +22,6 @@ const QuizScreen = () => {
     wasStarted,
     isRunning,
     countdown,
-    timeLeft,
-    errorsCount,
   } = useContext(QuizContext);
 
   useAuthGuard();
@@ -71,26 +69,6 @@ const QuizScreen = () => {
   const prevScoreRef = useRef(score);
   const [showCombo, setShowCombo] = useState(false);
   const prevStreakRef = useRef(streak);
-  const [isScrolled, setIsScrolled] = useState(false);
-  const isCounting = countdown !== null;
-  const timerText = useMemo(() => {
-    const safeSeconds = Math.max(0, timeLeft ?? 0);
-    const minutes = Math.floor(safeSeconds / 60);
-    const restSeconds = safeSeconds % 60;
-
-    return `${String(minutes).padStart(2, "0")}:${String(restSeconds).padStart(2, "0")}`;
-  }, [timeLeft]);
-
-  const countdownText = useMemo(() => {
-    if (countdown === null) {
-      return null;
-    }
-
-    return countdown === 0 ? "Старт" : String(countdown);
-  }, [countdown]);
-
-  const overlayTimerText = isCounting ? countdownText ?? timerText : timerText;
-  const showOverlayStats = wasStarted && !isQuizFinished;
 
   useEffect(() => {
     if (score > prevScoreRef.current) {
@@ -124,17 +102,6 @@ const QuizScreen = () => {
     return undefined;
   }, [streak]);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 12);
-    };
-
-    handleScroll();
-    window.addEventListener("scroll", handleScroll, { passive: true });
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
   const showIntroCard = !wasStarted;
 
   return (
@@ -146,28 +113,7 @@ const QuizScreen = () => {
               <ScoreBurst visible={showBurst && streak < 3} />
               <ComboBurst streak={streak} visible={showCombo} />
 
-              <div className={`quiz-stage ${isScrolled ? "is-scrolled" : ""}`}>
-                {showOverlayStats && (
-                  <div className="quiz-overlay-bar">
-                    <div className="quiz-stats quiz-stats--overlay gap-2">
-                      <div
-                        className={`quiz-timer flex-shrink-0 ${isCounting ? "is-counting" : ""}`}
-                        aria-live="polite"
-                      >
-                        <span className="fw-semibold">{overlayTimerText}</span>
-                      </div>
-                      <div className="quiz-scoreboard quiz-scoreboard--compact d-flex flex-nowrap align-items-center justify-content-center gap-2 flex-grow-1">
-                        <div className="quiz-score quiz-score--ok flex-shrink-1">
-                          <span className="quiz-score__value">{score}</span>
-                        </div>
-                        <div className="quiz-score quiz-score--bad flex-shrink-1">
-                          <span className="quiz-score__value">{errorsCount}</span>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
-
+              <div className="quiz-stage">
                 <QuizColumns hasStarted={wasStarted} />
 
                 <QuizHeader

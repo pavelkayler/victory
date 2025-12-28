@@ -50,32 +50,34 @@ const TopicActionsRow = ({
       </Row>
 
       {isEditingTopic ? (
-        <Row className="mt-3 mb-4 admin-topic-row-4">
-          <Col className="d-flex admin-topic-actions-buttons w-100">
-            <Button
-              variant="success"
-              type="button"
-              onClick={onSaveTopic}
-              disabled={isSaveDisabled}
-            >
-              Сохранить
-            </Button>
-            <Button
-              variant="primary"
-              onClick={onAddQuestion}
-              type="button"
-              className="admin-add-question-btn"
-            >
-              <i className="bi bi-plus-lg me-2" aria-hidden="true" />
-              Добавить вопрос
-            </Button>
-            <Button
-              variant="outline-secondary"
-              type="button"
-              onClick={onCancelEdit}
-            >
-              Отмена
-            </Button>
+        <Row className="mt-3 mb-4 admin-topic-row-4 g-0">
+          <Col xs={12}>
+            <div className="admin-topic-actions-buttons">
+              <Button
+                variant="success"
+                type="button"
+                onClick={onSaveTopic}
+                disabled={isSaveDisabled}
+              >
+                Сохранить
+              </Button>
+              <Button
+                variant="primary"
+                onClick={onAddQuestion}
+                type="button"
+                className="admin-add-question-btn"
+              >
+                <i className="bi bi-plus-lg me-2" aria-hidden="true" />
+                Добавить вопрос
+              </Button>
+              <Button
+                variant="outline-secondary"
+                type="button"
+                onClick={onCancelEdit}
+              >
+                Отмена
+              </Button>
+            </div>
           </Col>
         </Row>
       ) : (

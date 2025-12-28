@@ -255,6 +255,29 @@ const TopicsProvider = ({ children }) => {
     );
   }, []);
 
+  const deleteTopic = useCallback((topicId) => {
+    setTopics((prev) => prev.filter((topic) => topic.id !== topicId));
+  }, []);
+
+  const appendTopics = useCallback((nextTopics) => {
+    const normalizedTopics = (Array.isArray(nextTopics) ? nextTopics : [])
+      .map((topic) => normalizeTopic(topic))
+      .filter(Boolean);
+
+    if (normalizedTopics.length === 0) {
+      return;
+    }
+
+    setTopics((prev) => {
+      const topicsMap = new Map(prev.map((topic) => [topic.id, topic]));
+      normalizedTopics.forEach((topic) => {
+        topicsMap.set(topic.id, topic);
+      });
+
+      return Array.from(topicsMap.values());
+    });
+  }, []);
+
   const replaceTopics = useCallback((nextTopics) => {
     const normalizedTopics = (Array.isArray(nextTopics) ? nextTopics : [])
       .map((topic) => normalizeTopic(topic))
@@ -272,9 +295,22 @@ const TopicsProvider = ({ children }) => {
       addQuestion,
       updateQuestion,
       deleteQuestion,
+      deleteTopic,
+      appendTopics,
       replaceTopics,
     }),
-    [topics, getTopicById, addTopic, updateTopic, addQuestion, updateQuestion, deleteQuestion, replaceTopics],
+    [
+      topics,
+      getTopicById,
+      addTopic,
+      updateTopic,
+      addQuestion,
+      updateQuestion,
+      deleteQuestion,
+      deleteTopic,
+      appendTopics,
+      replaceTopics,
+    ],
   );
 
   return <TopicsContext.Provider value={value}>{children}</TopicsContext.Provider>;
