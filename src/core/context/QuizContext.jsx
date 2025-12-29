@@ -105,6 +105,7 @@ const QuizProvider = ({ children }) => {
   const [questions, setQuestions] = useState(initialTopic?.questions ?? []);
   const [topic, setTopic] = useState(initialTopic);
   const [timeLimitSeconds, setTimeLimitSeconds] = useState(initialTimeLimitSec);
+  const [shouldAutoInitTopic, setShouldAutoInitTopic] = useState(true);
 
   const [sessionId, setSessionId] = useState(0);
   const [completedSessionId, setCompletedSessionId] = useState(null);
@@ -136,6 +137,8 @@ const QuizProvider = ({ children }) => {
 
   // подготовка квиза (после выбора темы)
   const initQuiz = useCallback((nextTopic = null) => {
+    setShouldAutoInitTopic(true);
+
     const selectedTopic = nextTopic || topic || topics[0];
 
     if (!selectedTopic) {
@@ -179,11 +182,36 @@ const QuizProvider = ({ children }) => {
     setStartError(null);
   }, []);
 
+  const resetQuizState = useCallback(() => {
+    setShouldAutoInitTopic(false);
+    setTopic(null);
+    setQuestions([]);
+    setColumns({ leftItems: [], rightItems: [] });
+    setCurrentPrompt(null);
+    setScore(0);
+    setErrorsCount(0);
+    setTimeLimitSeconds(0);
+    setTimeLeft(0);
+    setIsRunning(false);
+    setIsRunRecorded(false);
+    setWasStarted(false);
+    setIsSelectionLocked(false);
+    setFeedback(null);
+    setStreak(0);
+    setBestStreak(0);
+    setSessionId((prev) => prev + 1);
+    setCompletedSessionId(null);
+    setCountdown(null);
+    setStartError(null);
+  }, []);
+
   useEffect(() => {
-    if (!topic && topics.length > 0) {
-      initQuiz(topics[0]);
+    if (!shouldAutoInitTopic || topic || topics.length === 0) {
+      return;
     }
-  }, [initQuiz, topic, topics]);
+
+    initQuiz(topics[0]);
+  }, [initQuiz, shouldAutoInitTopic, topic, topics]);
 
   useEffect(() => {
     if (!topic) {
@@ -431,6 +459,7 @@ const QuizProvider = ({ children }) => {
       startCountdown,
       resetCounters,
       resetTopic,
+      resetQuizState,
       finishQuiz,
       handleItemClick,
       startError,
@@ -458,6 +487,7 @@ const QuizProvider = ({ children }) => {
       startCountdown,
       resetCounters,
       resetTopic,
+      resetQuizState,
       finishQuiz,
       handleItemClick,
       startError,
