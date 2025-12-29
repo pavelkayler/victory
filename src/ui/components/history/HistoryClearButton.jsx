@@ -1,8 +1,9 @@
+import { memo } from "react";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import Row from "react-bootstrap/Row";
 
-const HistoryClearButton = ({ onClick }) => {
+const HistoryClearButtonComponent = ({ onClick }) => {
   return (
     <Row className="my-3">
       <Col xs={12} className="d-flex justify-content-center align-items-end">
@@ -13,5 +14,7 @@ const HistoryClearButton = ({ onClick }) => {
     </Row>
   );
 };
+
+const HistoryClearButton = memo(HistoryClearButtonComponent);
 
 export { HistoryClearButton };

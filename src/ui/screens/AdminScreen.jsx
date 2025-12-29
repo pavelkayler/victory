@@ -125,6 +125,15 @@ const AdminScreen = () => {
     showToast("Экспорт выполнен");
   }, [showToast, topics]);
 
+  const handleCloseImportModal = useCallback(() => {
+    setIsImportModalOpen(false);
+    setImportError("");
+    setSelectedImportFile(null);
+    if (importInputRef.current) {
+      importInputRef.current.value = "";
+    }
+  }, []);
+
   const handleImportTopics = useCallback(async (file, mode) => {
     if (!file) {
       setImportError("Выберите файл для импорта.");
@@ -191,15 +200,6 @@ const AdminScreen = () => {
     }
   }, []);
 
-  const handleCloseImportModal = useCallback(() => {
-    setIsImportModalOpen(false);
-    setImportError("");
-    setSelectedImportFile(null);
-    if (importInputRef.current) {
-      importInputRef.current.value = "";
-    }
-  }, []);
-
   const handleConfirmImport = useCallback(async () => {
     if (!selectedImportFile) {
       setImportError("Выберите файл для импорта.");
@@ -214,6 +214,10 @@ const AdminScreen = () => {
     logout();
     navigate("/", { replace: true });
   }, [logout, logoutAdmin, navigate]);
+
+  const handleToastClose = useCallback(() => {
+    setToastState((prev) => ({ ...prev, show: false }));
+  }, []);
 
   if (!isAdminAuthed) {
     return (
@@ -346,7 +350,7 @@ const AdminScreen = () => {
       <AppToast
         show={toastState.show}
         message={toastState.message}
-        onClose={() => setToastState((prev) => ({ ...prev, show: false }))}
+        onClose={handleToastClose}
         bg={toastState.bg}
       />
     </Container>

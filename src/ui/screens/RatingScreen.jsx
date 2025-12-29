@@ -1,4 +1,4 @@
-import { useContext, useMemo } from "react";
+import { memo, useContext, useMemo } from "react";
 import { useParams } from "react-router-dom";
 import Card from "react-bootstrap/Card";
 import CardBody from "react-bootstrap/CardBody";
@@ -10,7 +10,7 @@ import { HistoryContext, TopicsContext } from "../../core/context/Context.jsx";
 import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
 import { formatDateRu, formatDurationMmSs } from "../../core/utils/formatters.js";
 
-const RatingCard = ({ attempt }) => {
+const RatingCardComponent = ({ attempt }) => {
   return (
     <div className="rating-card">
       <div className="rating-card__row">
@@ -28,6 +28,8 @@ const RatingCard = ({ attempt }) => {
     </div>
   );
 };
+
+const RatingCard = memo(RatingCardComponent);
 
 const RatingScreen = () => {
   const { topicId } = useParams();
