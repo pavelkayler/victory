@@ -1,9 +1,14 @@
+import { memo, useCallback } from "react";
 import Col from "react-bootstrap/Col";
 import FormLabel from "react-bootstrap/FormLabel";
 import FormSelect from "react-bootstrap/FormSelect";
 import Row from "react-bootstrap/Row";
 
-const HistoryFilter = ({ selectedTopicId, topics, onChange }) => {
+const HistoryFilterComponent = ({ selectedTopicId, topics, onChange }) => {
+  const handleChange = useCallback((event) => {
+    onChange(event.target.value);
+  }, [onChange]);
+
   return (
     <Row className="gy-2 gx-3 align-items-center mb-3">
       <Col xs={12} className="history-filter-wrap">
@@ -11,7 +16,7 @@ const HistoryFilter = ({ selectedTopicId, topics, onChange }) => {
         <FormSelect
           className="w-100"
           value={selectedTopicId}
-          onChange={(event) => onChange(event.target.value)}
+          onChange={handleChange}
         >
           <option value="all">Все темы</option>
           {topics.map((topic) => (
@@ -24,5 +29,7 @@ const HistoryFilter = ({ selectedTopicId, topics, onChange }) => {
     </Row>
   );
 };
+
+const HistoryFilter = memo(HistoryFilterComponent);
 
 export { HistoryFilter };
