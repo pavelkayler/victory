@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Button from "react-bootstrap/Button";
 import CardTitle from "react-bootstrap/CardTitle";
 import OverlayTrigger from "react-bootstrap/OverlayTrigger";
@@ -49,4 +50,6 @@ const TopicListHeader = ({ total, onExportClick, onImportClick }) => {
   );
 };
 
-export { TopicListHeader };
+const TopicListHeaderMemo = memo(TopicListHeader);
+
+export { TopicListHeaderMemo as TopicListHeader };

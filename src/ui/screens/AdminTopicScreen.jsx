@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-import { useContext, useEffect, useMemo, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { Link, useLocation, useNavigate, useParams } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
@@ -28,6 +28,22 @@ const SORT_MODES = {
   rightAsc: "rightAsc",
   rightDesc: "rightDesc",
   created: "created",
+};
+
+const compareByField = (aValue, bValue, direction = 1) => {
+  const leftText = (aValue ?? "").trim();
+  const rightText = (bValue ?? "").trim();
+  const isLeftEmpty = leftText === "";
+  const isRightEmpty = rightText === "";
+
+  if (isLeftEmpty && !isRightEmpty) {
+    return 1;
+  }
+  if (!isLeftEmpty && isRightEmpty) {
+    return -1;
+  }
+
+  return leftText.localeCompare(rightText, "ru", { sensitivity: "base" }) * direction;
 };
 
 const AdminTopicScreen = () => {
@@ -98,28 +114,12 @@ const AdminTopicScreen = () => {
     && parsedTimeLimit >= 1
     && parsedTimeLimit <= 60;
 
-  const showToast = (message, bg = "success") => {
+  const showToast = useCallback((message, bg = "success") => {
     setToastState({ show: true, message, bg });
-  };
+  }, []);
 
   const displayedQuestions = useMemo(() => {
     const sorted = [...questions];
-
-    const compareByField = (aValue, bValue, direction = 1) => {
-      const leftText = (aValue ?? "").trim();
-      const rightText = (bValue ?? "").trim();
-      const isLeftEmpty = leftText === "";
-      const isRightEmpty = rightText === "";
-
-      if (isLeftEmpty && !isRightEmpty) {
-        return 1;
-      }
-      if (!isLeftEmpty && isRightEmpty) {
-        return -1;
-      }
-
-      return leftText.localeCompare(rightText, "ru", { sensitivity: "base" }) * direction;
-    };
 
     if (sortMode === SORT_MODES.leftAsc) {
       sorted.sort((a, b) => compareByField(a.left, b.left, 1));
@@ -151,7 +151,7 @@ const AdminTopicScreen = () => {
     return [...sequence, ...sortedWithoutPinned];
   }, [questions, sortMode, draftQuestion, pinnedQuestionId]);
 
-  const handleAddQuestion = () => {
+  const handleAddQuestion = useCallback(() => {
     if (!topic) {
       return;
     }
@@ -168,9 +168,9 @@ const AdminTopicScreen = () => {
     }));
     setEditingQuestionId(nextDraft.id);
     setHighlightedId(nextDraft.id);
-  };
+  }, [draftQuestion, topic]);
 
-  const handleDraftChange = (questionId, field, value) => {
+  const handleDraftChange = useCallback((questionId, field, value) => {
     setQuestionDrafts((prev) => ({
       ...prev,
       [questionId]: {
@@ -178,13 +178,13 @@ const AdminTopicScreen = () => {
         [field]: value,
       },
     }));
-  };
+  }, []);
 
-  const handleEditQuestion = (questionId) => {
+  const handleEditQuestion = useCallback((questionId) => {
     setEditingQuestionId(questionId);
-  };
+  }, []);
 
-  const handleCancelEdit = (question) => {
+  const handleCancelEdit = useCallback((question) => {
     if (question.id === "draft") {
       setDraftQuestion(null);
       setEditingQuestionId(null);
@@ -201,17 +201,17 @@ const AdminTopicScreen = () => {
       ...prev,
       [question.id]: {
         left: question.left ?? "",
-        right: question.right ?? "",
-      },
-    }));
-    setEditingQuestionId(null);
-  };
+      right: question.right ?? "",
+    },
+  }));
+  setEditingQuestionId(null);
+  }, []);
 
-  const handleDeleteQuestion = (questionId) => {
+  const handleDeleteQuestion = useCallback((questionId) => {
     setPendingDeleteId(questionId);
-  };
+  }, []);
 
-  const handleConfirmDelete = () => {
+  const handleConfirmDelete = useCallback(() => {
     if (!topic || pendingDeleteId === null) {
       setPendingDeleteId(null);
       return;
@@ -229,9 +229,9 @@ const AdminTopicScreen = () => {
     });
     setPendingDeleteId(null);
     showToast("Сохранено");
-  };
+  }, [deleteQuestion, pendingDeleteId, showToast, topic]);
 
-  const handleSaveQuestion = (questionId) => {
+  const handleSaveQuestion = useCallback((questionId) => {
     if (!topic) {
       return;
     }
@@ -286,13 +286,13 @@ const AdminTopicScreen = () => {
     setHighlightedId((prev) => (questionId === lastCreatedId ? prev : null));
     setPinnedQuestionId((prev) => (questionId === lastCreatedId ? prev : null));
     showToast("Сохранено");
-  };
+  }, [addQuestion, lastCreatedId, questionDrafts, showToast, topic, updateQuestion]);
 
-  const handleStartEditTopicMeta = () => {
+  const handleStartEditTopicMeta = useCallback(() => {
     setIsEditingTopicMeta(true);
-  };
+  }, []);
 
-  const handleSaveTopicMeta = () => {
+  const handleSaveTopicMeta = useCallback(() => {
     if (!topic) {
       return;
     }
@@ -317,27 +317,27 @@ const AdminTopicScreen = () => {
     });
     setIsEditingTopicMeta(false);
     showToast("Сохранено");
-  };
+  }, [showToast, topic, topicDescriptionDraft, topicTimeLimitDraft, topicTitleDraft, updateTopic]);
 
-  const handleCancelTopicMeta = () => {
+  const handleCancelTopicMeta = useCallback(() => {
     setTopicTitleDraft(topic?.title ?? "");
     setTopicDescriptionDraft(topic?.description ?? "");
     setTopicTimeLimitDraft(topic?.timeLimitMin ?? 5);
     setIsEditingTopicMeta(false);
-  };
+  }, [topic]);
 
-  const handleSortChange = (event) => {
+  const handleSortChange = useCallback((event) => {
     setSortMode(event.target.value);
     setPinnedQuestionId(null);
     setHighlightedId(null);
     setLastCreatedId(null);
-  };
+  }, []);
 
-  const handleDeleteTopic = () => {
+  const handleDeleteTopic = useCallback(() => {
     setIsDeleteTopicModalOpen(true);
-  };
+  }, []);
 
-  const handleConfirmDeleteTopic = () => {
+  const handleConfirmDeleteTopic = useCallback(() => {
     if (!topic) {
       setIsDeleteTopicModalOpen(false);
       return;
@@ -349,7 +349,7 @@ const AdminTopicScreen = () => {
       replace: true,
       state: { toastMessage: "Тема удалена" },
     });
-  };
+  }, [deleteTopic, navigate, topic]);
 
   if (!isAllowed) {
     return null;

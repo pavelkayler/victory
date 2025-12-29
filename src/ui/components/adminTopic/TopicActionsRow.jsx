@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Button from "react-bootstrap/Button";
 import Col from "react-bootstrap/Col";
 import FormControl from "react-bootstrap/FormControl";
@@ -94,4 +95,6 @@ const TopicActionsRow = ({
   );
 };
 
-export { TopicActionsRow };
+const TopicActionsRowMemo = memo(TopicActionsRow);
+
+export { TopicActionsRowMemo as TopicActionsRow };

@@ -1,9 +1,9 @@
-import { useContext } from "react";
+import { memo, useContext } from "react";
 import ListGroupItem from "react-bootstrap/ListGroupItem";
 
 import { QuizContext } from "../../../../core/context/Context.jsx";
 
-const QuizColumns = ({ hasStarted }) => {
+const QuizColumnsComponent = ({ hasStarted }) => {
   const {
     leftItems,
     rightItems,
@@ -84,5 +84,7 @@ const QuizColumns = ({ hasStarted }) => {
     </div>
   );
 };
+
+const QuizColumns = memo(QuizColumnsComponent);
 
 export { QuizColumns };

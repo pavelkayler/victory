@@ -1,4 +1,4 @@
-import { useContext, useMemo, useState } from "react";
+import { useCallback, useContext, useMemo, useState } from "react";
 import Card from "react-bootstrap/Card";
 import CardBody from "react-bootstrap/CardBody";
 import CardTitle from "react-bootstrap/CardTitle";
@@ -10,6 +10,7 @@ import {
   UserContext,
 } from "../../core/context/Context.jsx";
 import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
+import { formatDateRu, formatDurationMmSs } from "../../core/utils/formatters.js";
 import { ConfirmModal } from "../components/common/ConfirmModal.jsx";
 import { AppToast } from "../components/common/AppToast.jsx";
 import { HistoryFilter } from "../components/history/HistoryFilter.jsx";
@@ -40,42 +41,27 @@ const HistoryScreen = () => {
     return userHistory.filter((attempt) => attempt.topicId === selectedTopicId);
   }, [selectedTopicId, userHistory]);
 
-  const formatDate = (iso) => {
-    const date = new Date(iso);
-    return date.toLocaleString("ru-RU", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
-  const formatDuration = (seconds = 0) => {
-    const safeSeconds = Math.max(0, seconds ?? 0);
-    const minutes = Math.floor(safeSeconds / 60);
-    const restSeconds = safeSeconds % 60;
-
-    return `${String(minutes).padStart(2, "0")}:${String(restSeconds).padStart(2, "0")}`;
-  };
-
-  const handleClearHistory = () => {
+  const handleClearHistory = useCallback(() => {
     clearHistory();
     setToastState({ show: true, message: "История очищена" });
-  };
+  }, [clearHistory]);
 
-  const handleConfirmClear = () => {
+  const handleConfirmClear = useCallback(() => {
     handleClearHistory();
     setIsConfirmOpen(false);
-  };
+  }, [handleClearHistory]);
 
-  const openConfirm = () => {
+  const handleTopicChange = useCallback((value) => {
+    setSelectedTopicId(value);
+  }, []);
+
+  const openConfirm = useCallback(() => {
     setIsConfirmOpen(true);
-  };
+  }, []);
 
-  const closeConfirm = () => {
+  const closeConfirm = useCallback(() => {
     setIsConfirmOpen(false);
-  };
+  }, []);
 
   return (
     <Container fluid className="page-section">
@@ -90,15 +76,15 @@ const HistoryScreen = () => {
             <HistoryFilter
               selectedTopicId={selectedTopicId}
               topics={topics}
-              onChange={setSelectedTopicId}
+              onChange={handleTopicChange}
             />
 
             <HistoryClearButton onClick={openConfirm} />
 
             <HistoryAttemptList
               attempts={attemptsFiltered}
-              formatDate={formatDate}
-              formatDuration={formatDuration}
+              formatDate={formatDateRu}
+              formatDuration={formatDurationMmSs}
             />
           </CardBody>
         </Card>

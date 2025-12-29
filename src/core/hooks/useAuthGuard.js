@@ -9,7 +9,7 @@ const useAuthGuard = (redirectPath = "/") => {
 
   useEffect(() => {
     if (!isAuth) {
-      navigate(redirectPath);
+      navigate(redirectPath, { replace: true });
     }
   }, [isAuth, navigate, redirectPath]);
 

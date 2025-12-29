@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Stack } from "react-bootstrap";
 
 import { QuestionCard } from "./QuestionCard.jsx";
@@ -42,11 +43,11 @@ const QuestionsList = ({
             leftError={leftError}
             rightError={rightError}
             isValid={isValid}
-            onChange={(field, value) => onChange(question.id, field, value)}
-            onEdit={() => onEdit(question.id)}
-            onSave={() => onSave(question.id)}
-            onCancel={() => onCancel(question)}
-            onDelete={() => onDelete(question.id)}
+            onChange={onChange}
+            onEdit={onEdit}
+            onSave={onSave}
+            onCancel={onCancel}
+            onDelete={onDelete}
           />
         );
       })}
@@ -54,4 +55,6 @@ const QuestionsList = ({
   );
 };
 
-export { QuestionsList };
+const QuestionsListMemo = memo(QuestionsList);
+
+export { QuestionsListMemo as QuestionsList };

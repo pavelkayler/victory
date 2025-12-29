@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 import { AttemptCard } from "./AttemptCard.jsx";
 
 const HistoryAttemptList = ({ attempts, formatDate, formatDuration }) => {
@@ -19,4 +21,6 @@ const HistoryAttemptList = ({ attempts, formatDate, formatDuration }) => {
   );
 };
 
-export { HistoryAttemptList };
+const HistoryAttemptListMemo = memo(HistoryAttemptList);
+
+export { HistoryAttemptListMemo as HistoryAttemptList };

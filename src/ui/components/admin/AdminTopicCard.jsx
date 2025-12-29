@@ -1,3 +1,4 @@
+import { memo, useCallback } from "react";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 
@@ -5,6 +6,9 @@ import { pluralRu } from "../../../core/utils/pluralRu.js";
 
 const AdminTopicCard = ({ topic, onEdit }) => {
   const questionsLabel = `${topic.questions.length} ${pluralRu(topic.questions.length, ["вопрос", "вопроса", "вопросов"])}`;
+  const handleEdit = useCallback(() => {
+    onEdit(topic.id);
+  }, [onEdit, topic.id]);
 
   return (
     <div className="admin-topic-row">
@@ -27,7 +31,7 @@ const AdminTopicCard = ({ topic, onEdit }) => {
         <Button
           variant="outline-primary"
           type="button"
-          onClick={onEdit}
+          onClick={handleEdit}
         >
           Редактировать
         </Button>
@@ -36,4 +40,6 @@ const AdminTopicCard = ({ topic, onEdit }) => {
   );
 };
 
-export { AdminTopicCard };
+const AdminTopicCardMemo = memo(AdminTopicCard);
+
+export { AdminTopicCardMemo as AdminTopicCard };
