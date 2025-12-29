@@ -19,6 +19,7 @@ const Header = () => {
     countdown,
     finishQuiz,
     resetTopic,
+    resetQuizState,
     score,
     errorsCount,
   } = useContext(QuizContext);
@@ -26,7 +27,8 @@ const Header = () => {
   const isQuizPage = location.pathname === "/quiz";
   const isHistoryPage = location.pathname === "/history";
   const isAdminPage = location.pathname.startsWith(ADMIN_PATH);
-  const isResultPage = location.pathname === "/result";
+  const isResultPage =
+    location.pathname.startsWith("/result") || location.pathname.startsWith("/results");
   const navigate = useNavigate();
 
   const timerText = useMemo(() => {
@@ -51,12 +53,14 @@ const Header = () => {
   const showUserRow = Boolean(displayName);
 
   const handleTopicClick = (event) => {
-    resetTopic();
-
     if (isResultPage) {
       event?.preventDefault();
+      resetQuizState();
       navigate("/topics", { replace: true });
+      return;
     }
+
+    resetTopic();
   };
 
   if (!isAuth || isAdminAuthed || isAdminPage) {
