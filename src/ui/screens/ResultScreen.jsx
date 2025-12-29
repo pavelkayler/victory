@@ -15,8 +15,7 @@ import { QuizContext } from "../../core/context/Context.jsx";
 import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
 
 const ResultScreen = () => {
-  const { questions, score, errorsCount, initQuiz, isQuizFinished } =
-    useContext(QuizContext);
+  const { score, errorsCount, initQuiz, isQuizFinished } = useContext(QuizContext);
 
   const navigate = useNavigate();
 
@@ -58,7 +57,7 @@ const ResultScreen = () => {
             </CardBody>
           </Card>
 
-          <Card className="shadow-sm page-card">
+          {/* <Card className="shadow-sm page-card">
             <CardBody>
               <CardTitle className="fs-4 mb-3">
                 Вопросы и ответы викторины
@@ -75,7 +74,7 @@ const ResultScreen = () => {
                 ))}
               </ListGroup>
             </CardBody>
-          </Card>
+          </Card> */}
         </div>
       </div>
     </Container>

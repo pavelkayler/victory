@@ -1,5 +1,5 @@
 import { useContext, useMemo } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 
 import { AdminContext, QuizContext, UserContext } from "../../../core/context/Context.jsx";
 import { ADMIN_PATH } from "../../../core/constants/paths.js";
@@ -26,6 +26,8 @@ const Header = () => {
   const isQuizPage = location.pathname === "/quiz";
   const isHistoryPage = location.pathname === "/history";
   const isAdminPage = location.pathname.startsWith(ADMIN_PATH);
+  const isResultPage = location.pathname === "/result";
+  const navigate = useNavigate();
 
   const timerText = useMemo(() => {
     const safeSeconds = Math.max(0, timeLeft ?? 0);
@@ -47,6 +49,15 @@ const Header = () => {
   const showQuizControls = isQuizPage && wasStarted && !isQuizFinished;
   const isCounting = countdownText !== null;
   const showUserRow = Boolean(displayName);
+
+  const handleTopicClick = (event) => {
+    resetTopic();
+
+    if (isResultPage) {
+      event?.preventDefault();
+      navigate("/topics", { replace: true });
+    }
+  };
 
   if (!isAuth || isAdminAuthed || isAdminPage) {
     return null;
@@ -71,7 +82,7 @@ const Header = () => {
 
   return (
     <UserHeader
-      onTopicClick={resetTopic}
+      onTopicClick={handleTopicClick}
       isHistoryPage={isHistoryPage}
       displayName={displayName}
       onLogout={logout}
