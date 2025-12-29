@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Card, CardBody, Stack } from "react-bootstrap";
 
 import { AdminTopicCard } from "./AdminTopicCard.jsx";
@@ -20,7 +21,7 @@ const AdminTopicList = ({ topics, onEditTopic }) => {
       <CardBody>
         <Stack gap={3} className="admin-topics-list">
           {topics.map((topic) => (
-            <AdminTopicCard key={topic.id} topic={topic} onEdit={() => onEditTopic(topic.id)} />
+            <AdminTopicCard key={topic.id} topic={topic} onEdit={onEditTopic} />
           ))}
         </Stack>
       </CardBody>
@@ -28,4 +29,6 @@ const AdminTopicList = ({ topics, onEditTopic }) => {
   );
 };
 
-export { AdminTopicList };
+const AdminTopicListMemo = memo(AdminTopicList);
+
+export { AdminTopicListMemo as AdminTopicList };

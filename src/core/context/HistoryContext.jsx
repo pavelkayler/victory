@@ -1,4 +1,4 @@
-import { createContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useEffect, useMemo, useState } from "react";
 
 const HistoryContext = createContext(null);
 
@@ -29,7 +29,7 @@ const HistoryProvider = ({ children }) => {
     }
   }, [quizHistory]);
 
-  const addQuizAttempt = (attempt) => {
+  const addQuizAttempt = useCallback((attempt) => {
     setQuizHistory((prev) => [
       ...prev,
       {
@@ -37,16 +37,16 @@ const HistoryProvider = ({ children }) => {
         ...attempt,
       },
     ]);
-  };
+  }, []);
 
-  const clearHistory = () => {
+  const clearHistory = useCallback(() => {
     setQuizHistory([]);
     try {
-      localStorage.removeItem(HISTORY_STORAGE_KEY);
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify([]));
     } catch (error) {
       console.error("Failed to clear history", error);
     }
-  };
+  }, []);
 
   const value = useMemo(
     () => ({
@@ -54,7 +54,7 @@ const HistoryProvider = ({ children }) => {
       addQuizAttempt,
       clearHistory,
     }),
-    [quizHistory],
+    [quizHistory, addQuizAttempt, clearHistory],
   );
 
   return <HistoryContext.Provider value={value}>{children}</HistoryContext.Provider>;

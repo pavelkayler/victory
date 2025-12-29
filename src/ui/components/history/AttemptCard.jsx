@@ -1,3 +1,5 @@
+import { memo } from "react";
+
 const AttemptCard = ({ attempt, formatDate, formatDuration }) => {
   return (
     <div className="history-card" key={attempt.id}>
@@ -47,4 +49,6 @@ const AttemptCard = ({ attempt, formatDate, formatDuration }) => {
   );
 };
 
-export { AttemptCard };
+const AttemptCardMemo = memo(AttemptCard);
+
+export { AttemptCardMemo as AttemptCard };

@@ -1,3 +1,4 @@
+import { memo } from "react";
 import Badge from "react-bootstrap/Badge";
 import CardSubtitle from "react-bootstrap/CardSubtitle";
 import CardTitle from "react-bootstrap/CardTitle";
@@ -38,4 +39,6 @@ const TopicHero = ({ topic, questionsCount }) => {
   );
 };
 
-export { TopicHero };
+const TopicHeroMemo = memo(TopicHero);
+
+export { TopicHeroMemo as TopicHero };

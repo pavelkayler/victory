@@ -7,8 +7,6 @@ import {
   CardText,
   CardTitle,
   Container,
-  ListGroup,
-  ListGroupItem,
 } from "react-bootstrap";
 
 import { QuizContext } from "../../core/context/Context.jsx";

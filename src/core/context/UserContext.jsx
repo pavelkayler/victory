@@ -26,32 +26,32 @@ const getStoredAuth = () => {
 
 const UserContext = createContext(null);
 
-const UserProvider = ({ children }) => {
-  const stored = getStoredAuth();
+const persistAuthState = (authState) => {
+  if (typeof localStorage === "undefined") {
+    return;
+  }
 
-  const [isAuth, setIsAuth] = useState(stored?.isAuth ?? false);
-  const [userName, setUserName] = useState(stored?.userName ?? "");
+  if (authState.isAuth) {
+    localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authState));
+    return;
+  }
+
+  localStorage.removeItem(AUTH_STORAGE_KEY);
+};
+
+const UserProvider = ({ children }) => {
+  const [storedAuth] = useState(getStoredAuth);
+
+  const [isAuth, setIsAuth] = useState(() => storedAuth?.isAuth ?? false);
+  const [userName, setUserName] = useState(() => storedAuth?.userName ?? "");
   const [userStats, setUserStats] = useState({
     loginCount: 0,
     logoutCount: 0,
   });
 
-  const persistAuth = useCallback((authState) => {
-    if (typeof localStorage === "undefined") {
-      return;
-    }
-
-    if (authState.isAuth) {
-      localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authState));
-      return;
-    }
-
-    localStorage.removeItem(AUTH_STORAGE_KEY);
-  }, []);
-
   useEffect(() => {
-    persistAuth({ isAuth, userName });
-  }, [isAuth, persistAuth, userName]);
+    persistAuthState({ isAuth, userName });
+  }, [isAuth, userName]);
 
   const login = useCallback((name) => {
     const nextName = name || "Гость";
@@ -62,9 +62,7 @@ const UserProvider = ({ children }) => {
       ...prev,
       loginCount: prev.loginCount + 1,
     }));
-
-    persistAuth({ isAuth: true, userName: nextName });
-  }, [persistAuth]);
+  }, []);
 
   const logout = useCallback(() => {
     setIsAuth(false);
@@ -73,9 +71,7 @@ const UserProvider = ({ children }) => {
       ...prev,
       logoutCount: prev.logoutCount + 1,
     }));
-
-    persistAuth({ isAuth: false, userName: "" });
-  }, [persistAuth]);
+  }, []);
 
   const value = useMemo(
     () => ({

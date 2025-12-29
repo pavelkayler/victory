@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useEffect, useRef } from "react";
 import FormControl from "react-bootstrap/FormControl";
 import FormGroup from "react-bootstrap/FormGroup";
 import FormLabel from "react-bootstrap/FormLabel";
@@ -60,4 +60,6 @@ const TopicEditForm = ({
   );
 };
 
-export { TopicEditForm };
+const TopicEditFormMemo = memo(TopicEditForm);
+
+export { TopicEditFormMemo as TopicEditForm };

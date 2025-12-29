@@ -5,6 +5,7 @@ import {
   useEffect,
   useMemo,
   useCallback,
+  useRef,
   useState,
 } from "react";
 
@@ -134,6 +135,7 @@ const QuizProvider = ({ children }) => {
   const [streak, setStreak] = useState(0); // количество подряд верных ответов
   const [bestStreak, setBestStreak] = useState(0);
   const [startError, setStartError] = useState(null);
+  const promptTimeoutRef = useRef(null);
 
   // подготовка квиза (после выбора темы)
   const initQuiz = useCallback((nextTopic = null) => {
@@ -338,7 +340,11 @@ const QuizProvider = ({ children }) => {
 
     setIsSelectionLocked(true);
 
-    setTimeout(() => {
+    if (promptTimeoutRef.current) {
+      clearTimeout(promptTimeoutRef.current);
+    }
+
+    promptTimeoutRef.current = setTimeout(() => {
       setCurrentPrompt((prevPrompt) => {
         const prevPairId = prevPrompt ? prevPrompt.pairId : null;
         return pickRandomPrompt(columns, prevPairId);
@@ -347,6 +353,14 @@ const QuizProvider = ({ children }) => {
       setIsSelectionLocked(false);
     }, 250);
   }, [columns, currentPrompt, isQuizFinished, isRunning, isSelectionLocked, leftItems, rightItems]);
+
+  useEffect(() => {
+    return () => {
+      if (promptTimeoutRef.current) {
+        clearTimeout(promptTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     if (countdown === null) {

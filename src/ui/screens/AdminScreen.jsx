@@ -1,4 +1,4 @@
-import { useContext, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
@@ -19,7 +19,11 @@ import ModalTitle from "react-bootstrap/ModalTitle";
 
 import { AdminContext, TopicsContext, UserContext } from "../../core/context/Context.jsx";
 import { ADMIN_PATH } from "../../core/constants/paths.js";
-import { generateId, generateQuestionId, makeUniqueTitle } from "../../core/utils/topics.js";
+import {
+  normalizeImportedTopic,
+  prepareTopicsForAppend,
+  createTopicsExportBlob,
+} from "../../core/utils/importExportTopics.js";
 import { AppToast } from "../components/common/AppToast.jsx";
 import { AdminHeader } from "../components/admin/AdminHeader.jsx";
 import { TopicListHeader } from "../components/admin/TopicListHeader.jsx";
@@ -57,9 +61,9 @@ const AdminScreen = () => {
     };
   }, [topics]);
 
-  const showToast = (message, bg = "success") => {
+  const showToast = useCallback((message, bg = "success") => {
     setToastState({ show: true, message, bg });
-  };
+  }, []);
 
   useEffect(() => {
     if (location.state?.toastMessage) {
@@ -72,7 +76,7 @@ const AdminScreen = () => {
     }
   }, [location, navigate]);
 
-  const handlePasswordSubmit = (event) => {
+  const handlePasswordSubmit = useCallback((event) => {
     event.preventDefault();
     const isValid = authorize(password);
 
@@ -83,9 +87,9 @@ const AdminScreen = () => {
 
     setPasswordError("");
     setPassword("");
-  };
+  }, [authorize, password]);
 
-  const handleCreateTopic = (event) => {
+  const handleCreateTopic = useCallback((event) => {
     event.preventDefault();
     const nextTitle = topicTitle.trim();
     const normalizedTimeLimit = Math.min(60, Math.max(1, Number(topicTimeLimit) || 5));
@@ -102,81 +106,14 @@ const AdminScreen = () => {
     setTopicTitle("");
     setTopicDescription("");
     setTopicTimeLimit(5);
-  };
+  }, [addTopic, showToast, topicDescription, topicTimeLimit, topicTitle]);
 
-  const handleEditClick = (topicId) => {
+  const handleEditClick = useCallback((topicId) => {
     navigate(`${ADMIN_PATH}/topics/${topicId}`);
-  };
+  }, [navigate]);
 
-  const clampTimeLimit = (value) => {
-    const parsed = Number(value);
-    if (!Number.isFinite(parsed)) {
-      return 5;
-    }
-
-    return Math.min(60, Math.max(1, parsed));
-  };
-
-  const normalizeImportedTopic = (topic) => {
-    if (!topic || typeof topic !== "object") {
-      throw new Error("Некорректная структура темы.");
-    }
-
-    const topicId = typeof topic.id === "string" ? topic.id : topic.id?.toString();
-    if (!topicId) {
-      throw new Error("У темы отсутствует id.");
-    }
-
-    if (!Array.isArray(topic.questions)) {
-      throw new Error(`У темы "${topic.title || topicId}" отсутствует список вопросов.`);
-    }
-
-    if (typeof topic.title !== "string" || topic.title.trim() === "") {
-      throw new Error(`У темы "${topicId}" отсутствует название.`);
-    }
-
-    if (typeof topic.description !== "string") {
-      throw new Error(`У темы "${topicId}" отсутствует описание.`);
-    }
-
-    const normalizedQuestions = topic.questions
-      .map((question) => {
-        if (!question || typeof question !== "object") {
-          return null;
-        }
-
-        const questionId = Number(question.id);
-        if (!Number.isFinite(questionId)) {
-          return null;
-        }
-
-        return {
-          id: questionId,
-          left: typeof question.left === "string" ? question.left : "",
-          right: typeof question.right === "string" ? question.right : "",
-        };
-      })
-      .filter(Boolean);
-
-    const timeLimitRaw = topic.timeLimitMinutes ?? topic.timeLimitMin ?? topic.timeLimit;
-    const timeLimitMin = clampTimeLimit(timeLimitRaw ?? 5);
-
-    if (timeLimitMin === null) {
-      throw new Error(`Некорректное время у темы "${topic.title || topicId}".`);
-    }
-
-    return {
-      id: topicId,
-      title: topic.title.trim(),
-      description: topic.description,
-      timeLimitMin,
-      questions: normalizedQuestions,
-    };
-  };
-
-  const handleExportTopics = () => {
-    const payload = { topics };
-    const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+  const handleExportTopics = useCallback(() => {
+    const blob = createTopicsExportBlob(topics);
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
@@ -186,9 +123,9 @@ const AdminScreen = () => {
     link.remove();
     URL.revokeObjectURL(url);
     showToast("Экспорт выполнен");
-  };
+  }, [showToast, topics]);
 
-  const handleImportTopics = async (file, mode) => {
+  const handleImportTopics = useCallback(async (file, mode) => {
     if (!file) {
       setImportError("Выберите файл для импорта.");
       return;
@@ -213,22 +150,7 @@ const AdminScreen = () => {
       if (mode === "replace") {
         replaceTopics(normalizedTopics);
       } else {
-        const usedTitles = new Set(topics.map((topic) => topic.title));
-        const preparedTopics = normalizedTopics.map((topic) => {
-          const uniqueTitle = makeUniqueTitle(topic.title, usedTitles);
-          const preparedQuestions = topic.questions.map((question) => ({
-            ...question,
-            id: generateQuestionId(),
-          }));
-
-          return {
-            ...topic,
-            id: generateId(),
-            title: uniqueTitle,
-            questions: preparedQuestions,
-          };
-        });
-
+        const preparedTopics = prepareTopicsForAppend(normalizedTopics, topics);
         appendTopics(preparedTopics);
       }
 
@@ -243,9 +165,9 @@ const AdminScreen = () => {
         importInputRef.current.value = "";
       }
     }
-  };
+  }, [appendTopics, handleCloseImportModal, replaceTopics, showToast, topics]);
 
-  const handleImportChange = (event) => {
+  const handleImportChange = useCallback((event) => {
     const file = event.target.files?.[0];
     if (!file) {
       return;
@@ -253,13 +175,13 @@ const AdminScreen = () => {
 
     setSelectedImportFile(file);
     setImportError("");
-  };
+  }, []);
 
-  const handleFilePickerClick = () => {
+  const handleFilePickerClick = useCallback(() => {
     importInputRef.current?.click();
-  };
+  }, []);
 
-  const handleOpenImportModal = () => {
+  const handleOpenImportModal = useCallback(() => {
     setImportError("");
     setSelectedImportFile(null);
     setImportMode("append");
@@ -267,31 +189,31 @@ const AdminScreen = () => {
     if (importInputRef.current) {
       importInputRef.current.value = "";
     }
-  };
+  }, []);
 
-  const handleCloseImportModal = () => {
+  const handleCloseImportModal = useCallback(() => {
     setIsImportModalOpen(false);
     setImportError("");
     setSelectedImportFile(null);
     if (importInputRef.current) {
       importInputRef.current.value = "";
     }
-  };
+  }, []);
 
-  const handleConfirmImport = async () => {
+  const handleConfirmImport = useCallback(async () => {
     if (!selectedImportFile) {
       setImportError("Выберите файл для импорта.");
       return;
     }
 
     await handleImportTopics(selectedImportFile, importMode);
-  };
+  }, [handleImportTopics, importMode, selectedImportFile]);
 
-  const handleLogoutAdmin = () => {
+  const handleLogoutAdmin = useCallback(() => {
     logoutAdmin();
     logout();
     navigate("/", { replace: true });
-  };
+  }, [logout, logoutAdmin, navigate]);
 
   if (!isAdminAuthed) {
     return (

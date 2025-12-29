@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { memo, useCallback, useEffect, useRef } from "react";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
 import Card from "react-bootstrap/Card";
@@ -27,6 +27,24 @@ const QuestionCard = ({
   const isDraft = id === "draft";
   const leftRef = useRef(null);
   const rightRef = useRef(null);
+  const handleLeftChange = useCallback((event) => {
+    onChange(id, "left", event.target.value);
+  }, [id, onChange]);
+  const handleRightChange = useCallback((event) => {
+    onChange(id, "right", event.target.value);
+  }, [id, onChange]);
+  const handleEditClick = useCallback(() => {
+    onEdit(id);
+  }, [id, onEdit]);
+  const handleSaveClick = useCallback(() => {
+    onSave(id);
+  }, [id, onSave]);
+  const handleCancelClick = useCallback(() => {
+    onCancel(question);
+  }, [onCancel, question]);
+  const handleDeleteClick = useCallback(() => {
+    onDelete(id);
+  }, [id, onDelete]);
 
   const autoResize = (element) => {
     if (!element) {
@@ -81,7 +99,7 @@ const QuestionCard = ({
                     ref={leftRef}
                     value={draft.left}
                     placeholder="Фраза или вопрос"
-                    onChange={(event) => onChange("left", event.target.value)}
+                    onChange={handleLeftChange}
                     isInvalid={Boolean(leftError)}
                     className="auto-resize-textarea"
                   />
@@ -105,7 +123,7 @@ const QuestionCard = ({
                     ref={rightRef}
                     value={draft.right}
                     placeholder="Ответ или соответствие"
-                    onChange={(event) => onChange("right", event.target.value)}
+                    onChange={handleRightChange}
                     isInvalid={Boolean(rightError)}
                     className="auto-resize-textarea"
                   />
@@ -126,7 +144,7 @@ const QuestionCard = ({
               size="sm"
               variant="outline-primary"
               type="button"
-              onClick={onEdit}
+              onClick={handleEditClick}
             >
               Редактировать
             </Button>
@@ -134,7 +152,7 @@ const QuestionCard = ({
               size="sm"
               variant="outline-danger"
               type="button"
-              onClick={onDelete}
+              onClick={handleDeleteClick}
             >
               Удалить
             </Button>
@@ -146,7 +164,7 @@ const QuestionCard = ({
             <Button
               variant="success"
               type="button"
-              onClick={onSave}
+              onClick={handleSaveClick}
               disabled={Boolean(leftError || rightError)}
             >
               Сохранить
@@ -154,7 +172,7 @@ const QuestionCard = ({
             <Button
               variant="outline-secondary"
               type="button"
-              onClick={onCancel}
+              onClick={handleCancelClick}
             >
               Отмена
             </Button>
@@ -165,4 +183,6 @@ const QuestionCard = ({
   );
 };
 
-export { QuestionCard };
+const QuestionCardMemo = memo(QuestionCard);
+
+export { QuestionCardMemo as QuestionCard };

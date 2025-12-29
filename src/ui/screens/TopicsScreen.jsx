@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useCallback, useContext, useMemo } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import Badge from "react-bootstrap/Badge";
 import Button from "react-bootstrap/Button";
@@ -21,21 +21,46 @@ const TopicsScreen = () => {
 
   useAuthGuard();
 
-  const handleSelect = (topic) => () => {
-    const validCount = topic.questions.filter(isQuestionValid).length;
+  const availableTopics = useMemo(() => {
+    return topics
+      .map((topic) => {
+        const validQuestions = topic.questions.filter(isQuestionValid);
+        const validCount = validQuestions.length;
+        const totalCount = topic.questions.length;
+        const canStart = validCount >= MIN_PAIRS;
+        const badgeText = `${totalCount} ${pluralRu(totalCount, ["вопрос", "вопроса", "вопросов"])}`;
+        const timeLimitText = `${topic.timeLimitMin ?? 5} минут`;
 
-    if (validCount < MIN_PAIRS) {
+        return {
+          topic,
+          validCount,
+          totalCount,
+          canStart,
+          badgeText,
+          timeLimitText,
+        };
+      })
+      .filter((item) => item.validCount >= MIN_PAIRS);
+  }, [topics]);
+
+  const handleSelect = useCallback((topicId) => {
+    const selected = availableTopics.find((item) => item.topic.id === topicId);
+    if (!selected) {
       return;
     }
 
-    initQuiz(topic);
+    initQuiz(selected.topic);
     navigate("/quiz");
-  };
+  }, [availableTopics, initQuiz, navigate]);
 
-  const availableTopics = topics.filter((topic) => {
-    const validCount = topic.questions.filter(isQuestionValid).length;
-    return validCount >= MIN_PAIRS;
-  });
+  const handleSelectClick = useCallback((event) => {
+    const topicId = event.currentTarget.dataset.topicId;
+    if (!topicId) {
+      return;
+    }
+
+    handleSelect(topicId);
+  }, [handleSelect]);
 
   return (
     <Container fluid className="page-section">
@@ -54,58 +79,51 @@ const TopicsScreen = () => {
                 </CardBody>
               </Card>
             ) : (
-              availableTopics.map((topic) => {
-                const validCount = topic.questions.filter(isQuestionValid).length;
-                const totalCount = topic.questions.length;
-                const canStart = validCount >= MIN_PAIRS;
-                const badgeText = `${totalCount} ${pluralRu(totalCount, ["вопрос", "вопроса", "вопросов"])}`;
-                const timeLimitText = `${topic.timeLimitMin ?? 5} минут`;
-
-                return (
-                  <Card key={topic.id} className="mb-3 border-primary">
-                    <CardBody>
-                      <CardTitle className="fs-5 mb-2">
-                        <div className="topic-card-header">
-                          <div className="topic-card-title d-flex align-items-start gap-2">
-                            <i className="bi bi-book-half text-primary" aria-hidden="true" />
-                            <span className="text-break">{topic.title}</span>
-                          </div>
-                          <div className="topic-card-meta">
-                            <Badge bg="light" text="dark" className="fw-semibold topic-meta-badge topic-card-timer">
-                              {timeLimitText}
-                            </Badge>
-                            <Badge bg="light" text="dark" className="fw-semibold topic-meta-badge topic-card-count">
-                              {badgeText}
-                            </Badge>
-                          </div>
+              availableTopics.map(({ topic, badgeText, timeLimitText, canStart }) => (
+                <Card key={topic.id} className="mb-3 border-primary">
+                  <CardBody>
+                    <CardTitle className="fs-5 mb-2">
+                      <div className="topic-card-header">
+                        <div className="topic-card-title d-flex align-items-start gap-2">
+                          <i className="bi bi-book-half text-primary" aria-hidden="true" />
+                          <span className="text-break">{topic.title}</span>
                         </div>
-                      </CardTitle>
-                      <CardText className="mb-3 text-muted">
-                        {topic.description}
-                      </CardText>
-                      <div className="topic-card-actions d-flex gap-2 align-items-center topic-card-actions-row">
-                        <Button
-                          variant="primary"
-                          type="button"
-                          onClick={handleSelect(topic)}
-                          disabled={!canStart}
-                        >
-                          Пройти тест
-                        </Button>
-                        <Button
-                          variant="outline-secondary"
-                          as={Link}
-                          to={`/rating/${topic.id}`}
-                          type="button"
-                          className="topic-card-rating"
-                        >
-                          Рейтинг
-                        </Button>
+                        <div className="topic-card-meta">
+                          <Badge bg="light" text="dark" className="fw-semibold topic-meta-badge topic-card-timer">
+                            {timeLimitText}
+                          </Badge>
+                          <Badge bg="light" text="dark" className="fw-semibold topic-meta-badge topic-card-count">
+                            {badgeText}
+                          </Badge>
+                        </div>
                       </div>
-                    </CardBody>
-                  </Card>
-                );
-              })
+                    </CardTitle>
+                    <CardText className="mb-3 text-muted">
+                      {topic.description}
+                    </CardText>
+                    <div className="topic-card-actions d-flex gap-2 align-items-center topic-card-actions-row">
+                      <Button
+                        variant="primary"
+                        type="button"
+                        data-topic-id={topic.id}
+                        onClick={handleSelectClick}
+                        disabled={!canStart}
+                      >
+                        Пройти тест
+                      </Button>
+                      <Button
+                        variant="outline-secondary"
+                        as={Link}
+                        to={`/rating/${topic.id}`}
+                        type="button"
+                        className="topic-card-rating"
+                      >
+                        Рейтинг
+                      </Button>
+                    </div>
+                  </CardBody>
+                </Card>
+              ))
             )}
           </CardBody>
         </Card>

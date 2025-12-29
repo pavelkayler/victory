@@ -8,25 +8,7 @@ import Table from "react-bootstrap/Table";
 
 import { HistoryContext, TopicsContext } from "../../core/context/Context.jsx";
 import { useAuthGuard } from "../../core/hooks/useAuthGuard.js";
-
-const formatDate = (iso) => {
-  const date = new Date(iso);
-  return date.toLocaleString("ru-RU", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
-
-const formatDuration = (seconds = 0) => {
-  const safeSeconds = Math.max(0, seconds ?? 0);
-  const minutes = Math.floor(safeSeconds / 60);
-  const restSeconds = safeSeconds % 60;
-
-  return `${String(minutes).padStart(2, "0")}:${String(restSeconds).padStart(2, "0")}`;
-};
+import { formatDateRu, formatDurationMmSs } from "../../core/utils/formatters.js";
 
 const RatingCard = ({ attempt }) => {
   return (
@@ -40,8 +22,8 @@ const RatingCard = ({ attempt }) => {
         <span className="rating-card__wrong text-danger">Ошибок: {attempt.wrong}</span>
       </div>
       <div className="rating-card__row rating-card__row--meta">
-        <span className="rating-card__time">Время: {formatDuration(attempt.durationSec)}</span>
-        <span className="rating-card__date text-muted">{formatDate(attempt.date)}</span>
+        <span className="rating-card__time">Время: {formatDurationMmSs(attempt.durationSec)}</span>
+        <span className="rating-card__date text-muted">{formatDateRu(attempt.date)}</span>
       </div>
     </div>
   );
@@ -139,8 +121,8 @@ const RatingScreen = () => {
                           <td>{attempt.userName}</td>
                           <td className="text-success fw-semibold">{attempt.correct}</td>
                           <td className="text-danger fw-semibold">{attempt.wrong}</td>
-                          <td>{formatDuration(attempt.durationSec)}</td>
-                          <td>{formatDate(attempt.date)}</td>
+                          <td>{formatDurationMmSs(attempt.durationSec)}</td>
+                          <td>{formatDateRu(attempt.date)}</td>
                         </tr>
                       ))}
                     </tbody>
