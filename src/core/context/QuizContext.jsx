@@ -415,6 +415,30 @@ const QuizProvider = ({ children }) => {
     }
   }, [isQuizFinished, isRunning, sessionId, timeLeft]);
 
+  useEffect(() => {
+    if (!wasStarted || !isRunning || isQuizFinished) {
+      return undefined;
+    }
+
+    const handleVisibilityChange = () => {
+      if (document.hidden) {
+        finishQuiz();
+      }
+    };
+
+    const handleBlur = () => {
+      finishQuiz();
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+    window.addEventListener("blur", handleBlur);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      window.removeEventListener("blur", handleBlur);
+    };
+  }, [finishQuiz, isQuizFinished, isRunning, wasStarted]);
+
   // запись попытки в историю (когда квиз завершён, только один раз)
   useEffect(() => {
     if (!isQuizFinished || isRunRecorded || !wasStarted) {
