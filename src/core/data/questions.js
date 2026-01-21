@@ -1,5 +1,4 @@
-{
-  "topics": [
+export const topics = [
     {
       "id": "react-basics",
       "title": "React: основы и практики",
@@ -205,4 +204,3 @@
       ]
     }
   ]
-}
