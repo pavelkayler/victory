@@ -63,6 +63,23 @@ const normalizedDefaultTopics = defaultTopics
   .map((topic) => normalizeTopic(topic))
   .filter(Boolean);
 
+const mergeStoredTopicsWithDefaults = (storedTopics) => {
+  const normalizedStoredTopics = (Array.isArray(storedTopics) ? storedTopics : [])
+    .map((topic) => normalizeTopic(topic))
+    .filter(Boolean);
+
+  if (normalizedStoredTopics.length === 0) {
+    return normalizedDefaultTopics;
+  }
+
+  const storedTopicIds = new Set(normalizedStoredTopics.map((topic) => topic.id));
+  const missingDefaultTopics = normalizedDefaultTopics.filter(
+    (topic) => !storedTopicIds.has(topic.id),
+  );
+
+  return [...normalizedStoredTopics, ...missingDefaultTopics];
+};
+
 const readStoredTopics = () => {
   if (typeof localStorage === "undefined") {
     return normalizedDefaultTopics;
@@ -83,7 +100,7 @@ const readStoredTopics = () => {
       .map((topic) => normalizeTopic(topic))
       .filter(Boolean);
 
-    return normalizedTopics.length > 0 ? normalizedTopics : normalizedDefaultTopics;
+    return mergeStoredTopicsWithDefaults(normalizedTopics);
   } catch (error) {
     console.error("Failed to read topics from storage", error);
     return normalizedDefaultTopics;
